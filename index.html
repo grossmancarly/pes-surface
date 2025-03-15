@@ -42,7 +42,7 @@
                     let X = x[j];
                     let Y = y[i];
                     let reactionPath = A / (B + ((X - s) - xs)); // Maintains elbow shape
-                    let raw_Z = (alpha * (X - s) ** 2 - beta * (X - s) ** 4 + gamma * ((Y - q) - reactionPath) ** 2);
+                    let raw_Z = (-alpha * (X - s) ** 2 - beta * (X - s) ** 4 + gamma * ((Y - q) - reactionPath) ** 2);
                     row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }
                 Z.push(row);

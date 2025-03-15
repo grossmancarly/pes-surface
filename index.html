@@ -11,8 +11,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             text-align: center;
+        }
+        .plot-container {
+            width: 90%;
         }
         .slider-container {
             display: flex;
@@ -29,20 +31,17 @@
             width: 100%;
             margin: 10px 0;
         }
-        .plot-container {
-            width: 90%;
-        }
     </style>
 </head>
 <body>
     <h2>AB + C → ABC[TS] → A + BC</h2>
 
-    <!-- Plot container -->
+    <!-- 3D Surface Plot -->
     <div class="plot-container">
-        <div id="plot"></div>
+        <div id="plot-3D"></div>
     </div>
 
-    <!-- Sliders positioned between the two graphs -->
+    <!-- Sliders positioned above the contour map -->
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" class="slider" oninput="updatePlot()">
@@ -54,6 +53,11 @@
             <input type="range" id="aSlider" min="-1" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
             <span>Late</span>
         </div>
+    </div>
+
+    <!-- Contour Plot -->
+    <div class="plot-container">
+        <div id="plot-contour"></div>
     </div>
 
     <script>
@@ -99,7 +103,7 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false, // Hide the color scale
+                showscale: false,
                 name: 'Surface Plot'
             };
 
@@ -113,20 +117,23 @@
                 name: 'Contour Map'
             };
 
-            let layout = {
-                showlegend: false, // Hide legend
-                grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
-                height: 800,
+            let layout3D = {
+                showlegend: false,
+                height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                scene: { xaxis: { title: 'rAB' }, yaxis: { title: 'rBC' }, zaxis: { title: 'V' }, domain: { row: 0, column: 0 } },
-                xaxis2: { title: 'rAB Distance', anchor: 'y2' },
-                yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 }
+                scene: { xaxis: { title: 'rAB' }, yaxis: { title: 'rBC' }, zaxis: { title: 'V' } }
             };
 
-            Plotly.newPlot('plot', [
-                { ...surfacePlot, scene: 'scene' },
-                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }
-            ], layout);
+            let layoutContour = {
+                showlegend: false,
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                xaxis: { title: 'rAB Distance' },
+                yaxis: { title: 'rBC Distance', scaleanchor: 'x', scaleratio: 1 }
+            };
+
+            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
         }
 
         updatePlot();

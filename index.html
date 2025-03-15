@@ -45,24 +45,28 @@
         }
 
         function getReactionPath(data) {
-            let path = { x: [], y: [], z: [], coord: [] };
-            for (let i = 0; i < steps; i++) {
-                let minZ = Infinity, minJ = -1;
-                for (let j = 0; j < steps; j++) {
-                    if (data.z[i][j] < minZ) {
-                        minZ = data.z[i][j];
-                        minJ = j;
-                    }
-                }
-                if (minJ !== -1) {
-                    path.x.push(data.x[i]);
-                    path.y.push(data.y[minJ]);
-                    path.z.push(minZ);
-                    path.coord.push(i / (steps - 1));
-                }
+    let path = { x: [], y: [], z: [], coord: [] };
+    let minThreshold = 0.5; // Adjust this to cut off the steep part
+
+    for (let i = 0; i < steps; i++) {
+        if (data.x[i] < minThreshold) continue;  // Skip steep left part
+        let minZ = Infinity, minJ = -1;
+        for (let j = 0; j < steps; j++) {
+            if (data.z[i][j] < minZ) {
+                minZ = data.z[i][j];
+                minJ = j;
             }
-            return path;
         }
+        if (minJ !== -1) {
+            path.x.push(data.x[i]);
+            path.y.push(data.y[minJ]);
+            path.z.push(minZ);
+            path.coord.push((i - steps * 0.1) / (steps - 1)); // Shift to start at zero
+        }
+    }
+    return path;
+}
+
 
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
@@ -107,7 +111,7 @@
                 scene: { xaxis: { title: 'rAB' }, yaxis: { title: 'rBC' }, zaxis: { title: 'V' }, domain: { row: 0, column: 0 } },
                 xaxis2: { title: 'rAB Distance', anchor: 'y2' },
                 yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 },
-                xaxis3: { title: 'Reaction Coordinate', anchor: 'y3', domain: [0.1, 1] },
+                xaxis3: { title: 'Reaction Coordinate', anchor: 'y3'},
                 yaxis3: { title: 'Energy' }
             };
 

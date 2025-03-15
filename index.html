@@ -5,23 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60%;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .plot-container {
+            width: 90%;
+        }
+    </style>
 </head>
 <body>
     <h2>AB + C → ABC[TS] → A + BC</h2>
-    <div>
+
+    <!-- Plot container -->
+    <div class="plot-container">
+        <div id="plot"></div>
+    </div>
+
+    <!-- Sliders positioned between the two graphs -->
+    <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
-        <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
+        <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" class="slider" oninput="updatePlot()">
         <span id="EaValue"></span>
 
-        <div style="display: flex; align-items: center;">
-            <label for="aSlider" style="margin-right: 10px;">Transition State Position:</label>
+        <label for="aSlider">Transition State Position:</label>
+        <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
             <span>Early</span>
-            <input type="range" id="aSlider" min="-1" max="1" step="0.1" value="0" oninput="updatePlot()" style="margin: 0 10px;">
+            <input type="range" id="aSlider" min="-1" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
             <span>Late</span>
         </div>
     </div>
-
-    <div id="plot"></div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;

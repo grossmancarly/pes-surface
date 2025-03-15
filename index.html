@@ -96,7 +96,7 @@
                 mode: 'lines',
                 x: reactionPath.coord,
                 y: reactionPath.z,
-                line: { color: 'red', width: 3 },
+                line: { color: 'blue', width: 3 },
                 name: 'Reaction Path'
             };
 
@@ -107,7 +107,7 @@
                 scene: { domain: { row: 0, column: 0 } },
                 xaxis2: { title: 'rAB Distance', anchor: 'y2' },
                 yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 },
-                xaxis3: { title: 'Reaction Coordinate', anchor: 'y3' },
+                xaxis3: { title: 'Reaction Coordinate', anchor: 'y3', domain: [0.1, 1] },
                 yaxis3: { title: 'Energy' }
             };
 

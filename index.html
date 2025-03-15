@@ -36,6 +36,8 @@
             let xs = -0.36; // Keep xs constant
             let s = transition; // Adjust s based on transition state
             let q = A / (B + (s - xs)); // Ensures (s, q) stays on reaction path
+            let gamma = 0.7;
+            let delta = 1.0;
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
@@ -55,8 +57,6 @@
         function updatePlot() {
             let Ea = parseFloat(document.getElementById('Ea').value);
             let transition = parseFloat(document.getElementById('transition').value);
-            let gamma = parseFloat(document.getElementById('gamma').value);
-            let delta = parseFloat(document.getElementById('delta').value);
             
             let surfaceData = generateSurface(Ea, transition, gamma, delta);
             let surfacePlot = [{ type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];

@@ -14,12 +14,11 @@
         <span id="EaValue"></span>
 
         <div style="display: flex; align-items: center;">
-    <label for="aSlider" style="margin-right: 10px;">Transition State Position:</label>
-    <span>Early</span>
-    <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()" style="margin: 0 10px;">
-
-    <span>Late</span>
-</div>
+            <label for="aSlider" style="margin-right: 10px;">Transition State Position:</label>
+            <span>Early</span>
+            <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()" style="margin: 0 10px;">
+            <span>Late</span>
+        </div>
     </div>
 
     <div id="plot"></div>
@@ -49,38 +48,12 @@
             return { x, y, z };
         }
 
-        function getReactionPath(data) {
-    let path = { x: [], y: [], z: [], coord: [] };
-    let minThreshold = 0.5; // Adjust this to cut off the steep part
-
-    for (let i = 0; i < steps; i++) {
-        if (data.x[i] < minThreshold) continue;  // Skip steep left part
-        let minZ = Infinity, minJ = -1;
-        for (let j = 0; j < steps; j++) {
-            if (data.z[i][j] < minZ) {
-                minZ = data.z[i][j];
-                minJ = j;
-            }
-        }
-        if (minJ !== -1) {
-            path.x.push(data.x[i]);
-            path.y.push(data.y[minJ]);
-            path.z.push(minZ);
-            path.coord.push((i - steps * 0.1) / (steps - 1));
-
-        }
-    }
-    return path;
-}
-
-
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let aSlider = parseFloat(document.getElementById("aSlider").value);
             let a = 4.3 - aSlider; // Flip so right is late
 
             let data = generateData(k, a);
-            let reactionPath = getReactionPath(data);
 
             let surfacePlot = {
                 type: 'surface',
@@ -88,7 +61,7 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false,
+                showscale: false, // Hide the color scale
                 name: 'Surface Plot'
             };
 
@@ -102,6 +75,9 @@
                 name: 'Contour Map'
             };
 
+            /*
+            // Reaction coordinate plot - commented out for now
+            let reactionPath = getReactionPath(data);
             let reactionPathPlot = {
                 type: 'scatter',
                 mode: 'lines',
@@ -110,22 +86,22 @@
                 line: { color: 'blue', width: 3 },
                 name: 'Reaction Path'
             };
+            */
 
             let layout = {
-                grid: { rows: 3, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
-                height: 1000,
+                showlegend: false, // Hide legend
+                grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
+                height: 800,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
                 scene: { xaxis: { title: 'rAB' }, yaxis: { title: 'rBC' }, zaxis: { title: 'V' }, domain: { row: 0, column: 0 } },
                 xaxis2: { title: 'rAB Distance', anchor: 'y2' },
-                yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 },
-                xaxis3: { title: 'Reaction Coordinate', anchor: 'y3'},
-                yaxis3: { title: 'Energy' }
+                yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 }
             };
 
             Plotly.newPlot('plot', [
                 { ...surfacePlot, scene: 'scene' },
-                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' },
-                { ...reactionPathPlot, xaxis: 'x3', yaxis: 'y3' }
+                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }
+                // { ...reactionPathPlot, xaxis: 'x3', yaxis: 'y3' } // Commented out
             ], layout);
         }
 

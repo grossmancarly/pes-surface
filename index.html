@@ -81,42 +81,28 @@
                 title: '3D Transition State Surface with Contour Map',
                 autosize: true,
                 margin: { l: 0, r: 0, b: 0, t: 50 },
-                grid: {
-                    rows: 2, // Two rows (one for each plot)
-                    columns: 1, // One column
-                    pattern: 'independent', // Allow independent axes
-                },
-                xaxis: { title: 'X' },
-                yaxis: { title: 'Y' },
-                scene: {
-                    xaxis: { title: 'X' },
-                    yaxis: { title: 'Y' },
-                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
+                grid: { rows: 2, columns: 1, pattern: 'independent' },
+                xaxis2: { title: 'X' },  // Explicitly defining x-axis for contour plot
+                yaxis2: { title: 'Y' }   // Explicitly defining y-axis for contour plot
+            };
+
+            let fig = {
+                data: [
+                    { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene1' }, // 3D plot in first row
+                    { ...contourPlot, xaxis: 'x2', yaxis: 'y2' } // Contour plot in second row
+                ],
+                layout: {
+                    title: '3D Transition State Surface with Contour Map',
+                    autosize: true,
+                    margin: { l: 0, r: 0, b: 0, t: 50 },
+                    grid: { rows: 2, columns: 1, pattern: 'independent' },
+                    scene1: { domain: { row: 0, column: 0 } }, // Assign 3D plot to first row
+                    xaxis2: { title: 'X' },
+                    yaxis2: { title: 'Y' }
                 }
             };
 
-            Plotly.react('plot', [
-                { 
-                    type: 'surface',
-                    x: data.x,
-                    y: data.y,
-                    z: data.z,
-                    colorscale: 'Viridis',
-                    domain: { row: 0, column: 0 } // Position 3D plot in the first row
-                },
-                { 
-                    type: 'contour',
-                    x: data.x,
-                    y: data.y,
-                    z: data.z,
-                    contours: {
-                        coloring: 'heatmap',
-                        showlabels: true,
-                    },
-                    colorscale: 'Viridis',
-                    domain: { row: 1, column: 0 } // Position contour plot in the second row
-                }
-            ], layout);
+            Plotly.react('plot', fig.data, fig.layout);
         }
 
         updatePlot(); // Initialize the plot

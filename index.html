@@ -82,8 +82,8 @@
                 autosize: true,
                 margin: { l: 0, r: 0, b: 0, t: 50 },
                 grid: {
-                    rows: 1, // Number of rows
-                    columns: 2, // Number of columns
+                    rows: 2, // Two rows (one for each plot)
+                    columns: 1, // One column
                     pattern: 'independent', // Allow independent axes
                 },
                 xaxis: { title: 'X' },
@@ -102,7 +102,7 @@
                     y: data.y,
                     z: data.z,
                     colorscale: 'Viridis',
-                    domain: { x: [0, 0.5], y: [0, 1] } // position 3D plot
+                    domain: { x: [0, 1], y: [0, 0.5] } // position 3D plot in the first row
                 },
                 { 
                     type: 'contour',
@@ -114,7 +114,7 @@
                         showlabels: true,
                     },
                     colorscale: 'Viridis',
-                    domain: { x: [0.5, 1], y: [0, 1] } // position contour plot
+                    domain: { x: [0, 1], y: [0.5, 1] } // position contour plot in the second row
                 }
             ], layout);
         }

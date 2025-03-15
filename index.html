@@ -94,7 +94,12 @@
                     zaxis: { title: 'V(X, Y)', range: [null, zMax] }
                 },
                 xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
-                yaxis2: { title: 'Y', anchor: 'x2' }  // Separate y-axis for contour
+                yaxis2: { 
+                    title: 'Y', 
+                    anchor: 'x2', 
+                    scaleanchor: 'x2', // Forces equal scaling
+                    scaleratio: 1 // Ensures 1:1 aspect ratio
+                }
             };
 
             Plotly.newPlot('plot', [

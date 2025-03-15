@@ -5,15 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-label {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h2>AB + C → ABC‡ → A + BC</h2>
+    <h2>AB + C → [TS] → A + BC</h2>
     <div>
-        <label for="EaSlider">Activation Energy:</label>
+        <label for="EaSlider">Activation Energy (Ea): </label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
-
-        <label for="aSlider">Early/Late:</label>
+        <span id="EaValue">0.5</span>
+    </div>
+    
+    <div class="slider-container">
+        <span class="slider-label">Late</span>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
+        <span class="slider-label">Early</span>
+        <span id="aValue">2</span>
     </div>
 
     <div id="plot"></div>
@@ -51,6 +66,8 @@
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let a = parseFloat(document.getElementById("aSlider").value);
+            document.getElementById("EaValue").innerText = k;
+            document.getElementById("aValue").innerText = a;
 
             let data = generateData(k, a);
 
@@ -71,32 +88,31 @@
                 z: data.z,
                 contours: {
                     coloring: 'heatmap',
-                    showlabels: false,
+                    showlabels: true,
                 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };
 
             let layout = {
-                title: '',
+                title: '3D Transition State Surface with Contour Map',
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
                 height: 800, // Ensure enough height to separate the plots
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'rAB distance', showticklabels: false },
-                yaxis: { title: 'rBC distance', showticklabels: false },
+                xaxis: { title: 'X' },
+                yaxis: { title: 'Y' },
                 scene: {
                     domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
-                    xaxis: { title: 'rAB distance', showticklabels: false },
-                    yaxis: { title: 'rBC distance', showticklabels: false },
-                    zaxis: { title: '', range: [null, zMax] }
+                    xaxis: { title: 'X' },
+                    yaxis: { title: 'Y' },
+                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
                 },
-                xaxis2: { title: 'rAB distance', anchor: 'y2', showticklabels: false }, // Separate x-axis for contour
+                xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
                 yaxis2: { 
-                    title: 'rBC distance', 
+                    title: 'Y', 
                     anchor: 'x2', 
                     scaleanchor: 'x2', // Forces equal scaling
-                    scaleratio: 1, // Ensures 1:1 aspect ratio
-                    showticklabels: false
+                    scaleratio: 1 // Ensures 1:1 aspect ratio
                 }
             };
 

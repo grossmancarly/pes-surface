@@ -7,10 +7,13 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h2>AB + C → ABC[TS] → A + BC</h2>
     <div>
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
-        <label for="aSlider">Late &larr; Early:</label>
+        <span id="EaValue"></span>
+
+        <label for="aSlider">Late ← Early</label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
     </div>
 
@@ -42,26 +45,31 @@
         }
 
         function getReactionPath(data) {
-            let pathX = [], pathY = [], pathZ = [], pathS = [];
+            let path = { x: [], y: [], z: [], coord: [] };
             for (let i = 0; i < steps; i++) {
-                let x = data.x[i];
-                let y = 1 / x; // Constrain path along reaction coordinate
-                if (y < yMin || y > yMax) continue;
-                let j = data.y.findIndex(v => Math.abs(v - y) < 0.1);
-                if (j === -1) continue;
-                pathX.push(x);
-                pathY.push(y);
-                pathZ.push(data.z[i][j]);
-                pathS.push(i / (steps - 1)); // Normalize reaction coordinate
+                let minZ = Infinity, minJ = -1;
+                for (let j = 0; j < steps; j++) {
+                    if (data.z[i][j] < minZ) {
+                        minZ = data.z[i][j];
+                        minJ = j;
+                    }
+                }
+                if (minJ !== -1) {
+                    path.x.push(data.x[i]);
+                    path.y.push(data.y[minJ]);
+                    path.z.push(minZ);
+                    path.coord.push(i / (steps - 1));
+                }
             }
-            return { pathX, pathY, pathZ, pathS };
+            return path;
         }
 
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let a = parseFloat(document.getElementById("aSlider").value);
+
             let data = generateData(k, a);
-            let path = getReactionPath(data);
+            let reactionPath = getReactionPath(data);
 
             let surfacePlot = {
                 type: 'surface',
@@ -84,52 +92,29 @@
             };
 
             let reactionPathPlot = {
-                type: 'scatter3d',
+                type: 'scatter',
                 mode: 'lines',
-                x: path.pathX,
-                y: path.pathY,
-                z: path.pathZ,
-                line: { color: 'red', width: 4 },
+                x: reactionPath.coord,
+                y: reactionPath.z,
+                line: { color: 'red', width: 3 },
                 name: 'Reaction Path'
             };
 
-            let energyProfilePlot = {
-                type: 'scatter',
-                mode: 'lines',
-                x: path.pathS,
-                y: path.pathZ,
-                line: { color: 'black', width: 2 },
-                name: 'Energy vs Reaction Coordinate'
-            };
-
             let layout = {
-                title: '3D Transition State Surface with Contour Map',
-                height: 900,
-                grid: { rows: 3, columns: 1, pattern: 'independent' },
+                grid: { rows: 3, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
+                height: 1000,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                annotations: [{
-                    text: "AB + C → ABC[TS] → A + BC",
-                    showarrow: false,
-                    font: { size: 16 },
-                    x: 0.5, y: 1.1, xref: 'paper', yref: 'paper', align: 'center'
-                }],
-                scene: {
-                    domain: { row: 0, column: 0 },
-                    xaxis: { title: 'rAB Distance' },
-                    yaxis: { title: 'rBC Distance' },
-                    zaxis: { title: 'V(rAB, rBC)', range: [null, zMax] }
-                },
+                scene: { domain: { row: 0, column: 0 } },
                 xaxis2: { title: 'rAB Distance', anchor: 'y2' },
-                yaxis2: { title: 'rBC Distance', anchor: 'x2', scaleanchor: 'x2', scaleratio: 1 },
+                yaxis2: { title: 'rBC Distance', scaleanchor: 'x2', scaleratio: 1 },
                 xaxis3: { title: 'Reaction Coordinate', anchor: 'y3' },
-                yaxis3: { title: 'Energy', anchor: 'x3' }
+                yaxis3: { title: 'Energy' }
             };
 
             Plotly.newPlot('plot', [
                 { ...surfacePlot, scene: 'scene' },
                 { ...contourPlot, xaxis: 'x2', yaxis: 'y2' },
-                { ...reactionPathPlot, scene: 'scene' },
-                { ...energyProfilePlot, xaxis: 'x3', yaxis: 'y3' }
+                { ...reactionPathPlot, xaxis: 'x3', yaxis: 'y3' }
             ], layout);
         }
 

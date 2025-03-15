@@ -6,98 +6,32 @@
     <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-        /* General Page Styling */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: #f8f9fa;
-            color: #333;
-            margin: 0;
-            padding: 20px;
+            background: white; /* Entire page is now white */
+            color: black;
         }
-
-        h2 {
-            font-size: 24px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-
-        /* Plot Container */
         .plot-container {
             width: 90%;
-            margin: 20px 0;
         }
-
-        /* Sliders Section (Integrated into Background) */
         .slider-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 50%;
-            padding: 10px;
-            background: transparent; /* Remove white box */
+            width: 60%;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
         }
-
-        .slider-container label {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: 5px;
-        }
-
         .slider {
             width: 100%;
-            margin: 5px 0;
-            -webkit-appearance: none;
-            appearance: none;
-            height: 6px;
-            background: #3498db;
-            outline: none;
-            opacity: 0.8;
-            transition: opacity 0.2s ease-in-out;
+            margin: 10px 0;
+            background: #ccc; /* Grey sliders */
             border-radius: 5px;
-        }
-
-        .slider:hover {
-            opacity: 1;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #1d6fa5;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.2s ease-in-out;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            background: #14537b;
-        }
-
-        /* Slider Labels */
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            font-size: 14px;
-            margin-top: -8px;
-            color: #555;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .slider-container {
-                width: 80%;
-            }
-            .plot-container {
-                width: 95%;
-            }
         }
     </style>
 </head>
@@ -109,19 +43,17 @@
         <div id="plot-3D"></div>
     </div>
 
-    <!-- Sliders Positioned Above the Contour Map -->
+    <!-- Sliders positioned above the contour map -->
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" class="slider" oninput="updatePlot()">
         <span id="EaValue"></span>
 
         <label for="aSlider">Transition State Position:</label>
-        <div style="width: 100%;">
-            <div class="slider-labels">
-                <span>Early</span>
-                <span>Late</span>
-            </div>
-            <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()">
+        <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
+            <span>Early</span>
+            <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
+            <span>Late</span>
         </div>
     </div>
 
@@ -182,7 +114,7 @@
                 x: data.x,
                 y: data.y,
                 z: data.z,
-                contours: { coloring: 'heatmap' },
+                contours: { coloring: 'heatmap', showlines: true, size: 0.1 }, // More contour lines
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };

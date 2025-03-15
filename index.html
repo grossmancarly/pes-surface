@@ -86,6 +86,8 @@
                     columns: 2, // Number of columns
                     pattern: 'independent', // Allow independent axes
                 },
+                xaxis: { title: 'X' },
+                yaxis: { title: 'Y' },
                 scene: {
                     xaxis: { title: 'X' },
                     yaxis: { title: 'Y' },
@@ -93,7 +95,28 @@
                 }
             };
 
-            Plotly.react('plot', [surfacePlot, contourPlot], layout);
+            Plotly.react('plot', [
+                { 
+                    type: 'surface',
+                    x: data.x,
+                    y: data.y,
+                    z: data.z,
+                    colorscale: 'Viridis',
+                    domain: { x: [0, 0.5], y: [0, 1] } // position 3D plot
+                },
+                { 
+                    type: 'contour',
+                    x: data.x,
+                    y: data.y,
+                    z: data.z,
+                    contours: {
+                        coloring: 'heatmap',
+                        showlabels: true,
+                    },
+                    colorscale: 'Viridis',
+                    domain: { x: [0.5, 1], y: [0, 1] } // position contour plot
+                }
+            ], layout);
         }
 
         updatePlot(); // Initialize the plot

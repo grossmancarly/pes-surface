@@ -14,8 +14,8 @@
     <label for="Ea">Activation Energy (Ea):</label>
     <input type="range" id="Ea" min="0.1" max="5.0" step="0.1" value="2.5" oninput="updatePlot()">
     
-    <label for="xs">Early/Late Transition State (xs):</label>
-    <input type="range" id="xs" min="0.5" max="4.5" step="0.1" value="2.5" oninput="updatePlot()">
+    <label for="transition">Early/Late Transition State (xs):</label>
+    <input type="range" id="transition" min="-2.0" max="2.0" step="0.1" value="0.0" oninput="updatePlot()">
     
     <label for="gamma">Gamma:</label>
     <input type="range" id="gamma" min="1.0" max="10.0" step="0.5" value="5.0" oninput="updatePlot()">
@@ -29,16 +29,18 @@
             let y = numeric.linspace(0.1, 5, 100);
             let Z = [];
 
+            let alpha = Ea;
             let beta = 1.0;
             let A = 1.0;
+            let B = 1.0;
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
                 for (let j = 0; j < x.length; j++) {
                     let X = x[j];
                     let Y = y[i];
-                    let reactionPath = A / (1 + X); // Maintains elbow shape
-                    let raw_Z = Ea - beta * (X - xs) ** 4 + gamma * (Y - reactionPath) ** 2;
+                    let reactionPath = A / (B + (X - xs)); // Maintains elbow shape
+                    let raw_Z = (alpha * X ** 2 - beta * X ** 4 + gamma * (Y - reactionPath) ** 2);
                     row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }
                 Z.push(row);
@@ -49,7 +51,7 @@
 
         function updatePlot() {
             let Ea = parseFloat(document.getElementById('Ea').value);
-            let xs = parseFloat(document.getElementById('xs').value);
+            let xs = parseFloat(document.getElementById('transition').value);
             let gamma = parseFloat(document.getElementById('gamma').value);
             let delta = parseFloat(document.getElementById('delta').value);
             

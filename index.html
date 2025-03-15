@@ -8,13 +8,15 @@
 </head>
 <body>
     <h2>Interactive PES Surface</h2>
-    <div id="plot"></div>
     
     <label for="Ea">Activation Energy (Ea):</label>
     <input type="range" id="Ea" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updatePlot()">
     
     <label for="transition">Early/Late Transition State:</label>
     <input type="range" id="transition" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updatePlot()">
+    
+    <div id="plot"></div>
+    <div id="contour"></div>
     
     <script>
         function generateSurface(Ea, transition) {
@@ -49,9 +51,29 @@
             let transition = parseFloat(document.getElementById('transition').value);
             
             let surfaceData = generateSurface(Ea, transition);
-            let data = [{ type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];
             
-            Plotly.newPlot('plot', data);
+            // 3D Surface Plot
+            let surfacePlot = {
+                type: 'surface',
+                x: surfaceData.x,
+                y: surfaceData.y,
+                z: surfaceData.z,
+                colorscale: 'Jet'
+            };
+
+            Plotly.newPlot('plot', [surfacePlot]);
+
+            // Contour Plot
+            let contourPlot = {
+                type: 'contour',
+                x: surfaceData.x,
+                y: surfaceData.y,
+                z: surfaceData.z,
+                colorscale: 'Jet',
+                contours: { showlabels: true }
+            };
+
+            Plotly.newPlot('contour', [contourPlot]);
         }
 
         updatePlot(); // Initial plot on page load

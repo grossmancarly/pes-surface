@@ -5,16 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .slider-label {
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
     <h2>AB + C → [TS] → A + BC</h2>
@@ -22,12 +12,10 @@
         <label for="EaSlider">Activation Energy (Ea): </label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
         <span id="EaValue">0.5</span>
-    </div>
-    
-    <div class="slider-container">
-        <span class="slider-label">Late</span>
+
+        <label for="aSlider">Early</label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
-        <span class="slider-label">Early</span>
+        <label for="aSlider">Late</label>
         <span id="aValue">2</span>
     </div>
 
@@ -38,9 +26,7 @@
         let zMax = 5; // Limit for z-values
 
         function generateData(k, a) {
-            let x = [];
-            let y = [];
-            let z = [];
+            let x = [], y = [], z = [], rxnPath = { x: [], y: [] };
 
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
@@ -56,11 +42,17 @@
                     let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
                     let zv = Math.min(valley + peak, zMax);  // Cap at zMax
                     row.push(zv);
+                    
+                    // Capture reaction path where valley dominates
+                    if (Math.abs(zv - valley) < 0.1) {
+                        rxnPath.x.push(xv);
+                        rxnPath.y.push(yv);
+                    }
                 }
                 z.push(row);
             }
 
-            return { x, y, z };
+            return { x, y, z, rxnPath };
         }
 
         function updatePlot() {
@@ -88,37 +80,47 @@
                 z: data.z,
                 contours: {
                     coloring: 'heatmap',
-                    showlabels: true,
+                    showlabels: false,
                 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };
 
+            let reactionPathTrace = {
+                type: 'scatter',
+                mode: 'lines',
+                x: data.rxnPath.x,
+                y: data.rxnPath.y,
+                line: { color: 'red', width: 3 },
+                name: 'Reaction Path'
+            };
+
             let layout = {
                 title: '3D Transition State Surface with Contour Map',
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
-                height: 800, // Ensure enough height to separate the plots
+                height: 800,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'X' },
-                yaxis: { title: 'Y' },
+                xaxis: { title: 'rAB Distance' },
+                yaxis: { title: 'rBC Distance' },
                 scene: {
-                    domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
-                    xaxis: { title: 'X' },
-                    yaxis: { title: 'Y' },
-                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
+                    domain: { row: 0, column: 0 },
+                    xaxis: { title: 'rAB Distance' },
+                    yaxis: { title: 'rBC Distance' },
+                    zaxis: { title: 'V(rAB, rBC)', range: [null, zMax] }
                 },
-                xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
+                xaxis2: { title: 'rAB Distance', anchor: 'y2' },
                 yaxis2: { 
-                    title: 'Y', 
+                    title: 'rBC Distance', 
                     anchor: 'x2', 
-                    scaleanchor: 'x2', // Forces equal scaling
-                    scaleratio: 1 // Ensures 1:1 aspect ratio
+                    scaleanchor: 'x2', 
+                    scaleratio: 1 
                 }
             };
 
             Plotly.newPlot('plot', [
-                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' }, // 3D surface on top
-                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }  // Contour on bottom
+                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' },
+                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' },
+                reactionPathTrace
             ], layout);
         }
 

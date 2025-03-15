@@ -16,7 +16,7 @@
         <div style="display: flex; align-items: center;">
             <label for="aSlider" style="margin-right: 10px;">Transition State Position:</label>
             <span>Early</span>
-            <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()" style="margin: 0 10px;">
+            <input type="range" id="aSlider" min="-1" max="1" step="0.1" value="0" oninput="updatePlot()" style="margin: 0 10px;">
             <span>Late</span>
         </div>
     </div>
@@ -26,6 +26,11 @@
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
+
+        // Function to transform slider values (-1 to 1) to 'a' values (0.3 to 4)
+        function transformSliderValue(x) {
+            return -0.296 * Math.pow(x, 2) + 1.8134 * x + 1.5174;
+        }
 
         function generateData(k, a) {
             let x = [], y = [], z = [];
@@ -50,10 +55,8 @@
 
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
-            let aSlider = parseFloat(document.getElementById("aSlider").value);
-            let a = 4.3 - aSlider; // Flip so right is late
-
-
+            let sliderValue = parseFloat(document.getElementById("aSlider").value);
+            let a = transformSliderValue(sliderValue); // Convert slider value to a
 
             let data = generateData(k, a);
 
@@ -77,19 +80,6 @@
                 name: 'Contour Map'
             };
 
-            /*
-            // Reaction coordinate plot - commented out for now
-            let reactionPath = getReactionPath(data);
-            let reactionPathPlot = {
-                type: 'scatter',
-                mode: 'lines',
-                x: reactionPath.coord,
-                y: reactionPath.z,
-                line: { color: 'blue', width: 3 },
-                name: 'Reaction Path'
-            };
-            */
-
             let layout = {
                 showlegend: false, // Hide legend
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
@@ -103,7 +93,6 @@
             Plotly.newPlot('plot', [
                 { ...surfacePlot, scene: 'scene' },
                 { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }
-                // { ...reactionPathPlot, xaxis: 'x3', yaxis: 'y3' } // Commented out
             ], layout);
         }
 

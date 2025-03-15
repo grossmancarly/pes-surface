@@ -123,15 +123,15 @@
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                scene: { xaxis: { title: 'rAB' }, yaxis: { title: 'rBC' }, zaxis: { title: 'V' } }
+                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
             };
 
             let layoutContour = {
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'rAB Distance' },
-                yaxis: { title: 'rBC Distance', scaleanchor: 'x', scaleratio: 1 }
+                xaxis: { title: 'rBC Distance' },
+                yaxis: { title: 'rAB Distance', scaleanchor: 'x', scaleratio: 1 }
             };
 
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);

@@ -7,56 +7,75 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <div>
+        <label for="EaSlider">Activation Energy (Ea): </label>
+        <input type="range" id="EaSlider" min="0" max="5" step="0.1" value="2" oninput="updatePlot()">
+        <span id="EaValue">2</span>
+
+        <label for="aSlider">Early/Late (a): </label>
+        <input type="range" id="aSlider" min="0.5" max="4" step="0.1" value="2" oninput="updatePlot()">
+        <span id="aValue">2</span>
+    </div>
+
     <div id="plot"></div>
 
     <script>
-        let x = [];
-        let y = [];
-        let z = [];
+        let xMin = 0.2, xMax = 5, yMin = 0.2, yMax = 5, steps = 50;
+        let zMax = 5; // Limit for z-values
 
-        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 50;
-        let k = 2;  // Activation energy height
-        let a = 2;  // Controls early vs. late transition state
-        let zMax = 5;  // Limit for z-values
+        function generateData(k, a) {
+            let x = [];
+            let y = [];
+            let z = [];
 
-        for (let i = 0; i < steps; i++) {
-            x.push(xMin + (xMax - xMin) * i / (steps - 1));
-            y.push(yMin + (yMax - yMin) * i / (steps - 1));
+            for (let i = 0; i < steps; i++) {
+                x.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
+            }
+
+            for (let i = 0; i < steps; i++) {
+                let row = [];
+                for (let j = 0; j < steps; j++) {
+                    let xv = x[i];
+                    let yv = y[j];
+                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                    let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
+                    let zv = Math.min(valley + peak, zMax);  // Cap at zMax
+                    row.push(zv);
+                }
+                z.push(row);
+            }
+
+            return { x, y, z };
         }
 
-        for (let i = 0; i < steps; i++) {
-            let row = [];
-            for (let j = 0; j < steps; j++) {
-                let xv = x[i];
-                let yv = y[j];
-                let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
-                let zv = Math.min(valley + peak, zMax);  // Cap at zMax
-                row.push(zv);
-            }
-            z.push(row);
+        function updatePlot() {
+            let k = parseFloat(document.getElementById("EaSlider").value);
+            let a = parseFloat(document.getElementById("aSlider").value);
+            document.getElementById("EaValue").innerText = k;
+            document.getElementById("aValue").innerText = a;
+
+            let data = generateData(k, a);
+
+            Plotly.react('plot', [{
+                type: 'surface',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis'
+            }], {
+                title: '3D Transition State Surface',
+                autosize: true,
+                margin: { l: 0, r: 0, b: 0, t: 50 },
+                scene: {
+                    xaxis: { title: 'X' },
+                    yaxis: { title: 'Y' },
+                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
+                }
+            });
         }
 
-        let data = [{
-            type: 'surface',
-            x: x,
-            y: y,
-            z: z,
-            colorscale: 'Viridis'
-        }];
-
-        let layout = {
-            title: '3D Potential Surface with Adjustable Transition State',
-            autosize: true,
-            margin: { l: 0, r: 0, b: 0, t: 50 },
-            scene: {
-                xaxis: { title: 'X' },
-                yaxis: { title: 'Y' },
-                zaxis: { title: 'V(X, Y)', range: [null, zMax] }
-            }
-        };
-
-        Plotly.newPlot('plot', data, layout);
+        updatePlot(); // Initialize the plot
     </script>
 </body>
 </html>

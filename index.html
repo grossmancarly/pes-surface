@@ -16,7 +16,8 @@
         <div style="display: flex; align-items: center;">
     <label for="aSlider" style="margin-right: 10px;">Transition State Position:</label>
     <span>Late</span>
-    <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()" style="margin: 0 10px;">
+    <input type="range" id="aSlider" min="4" max="0.3" step="-0.1" value="2" oninput="updatePlot()">
+
     <span>Early</span>
 </div>
     </div>
@@ -65,7 +66,8 @@
             path.x.push(data.x[i]);
             path.y.push(data.y[minJ]);
             path.z.push(minZ);
-            path.coord.push((i - steps * 0.1) / (steps - 1)); // Shift to start at zero
+            path.coord.push(1 - (i - steps * 0.1) / (steps - 1)); // Flip the coordinate
+
         }
     }
     return path;

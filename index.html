@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Transition State Surface</title>
+    <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div>
         <label for="EaSlider">Activation Energy (Ea): </label>
         <input type="range" id="EaSlider" min="0" max="1" step="0.01" value=".5" oninput="updatePlot()">
-        <span id="EaValue">2</span>
+        <span id="EaValue">0.5</span>
 
         <label for="aSlider">Early/Late (a): </label>
         <input type="range" id="aSlider" min="0.5" max="4" step="0.1" value="2" oninput="updatePlot()">
@@ -57,14 +57,27 @@
 
             let data = generateData(k, a);
 
-            Plotly.react('plot', [{
-                type: 'surface',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                colorscale: 'Viridis'
-            }], {
-                title: '3D Transition State Surface',
+            Plotly.react('plot', [
+                {
+                    type: 'surface',
+                    x: data.x,
+                    y: data.y,
+                    z: data.z,
+                    colorscale: 'Viridis'
+                },
+                {
+                    type: 'contour',
+                    x: data.x,
+                    y: data.y,
+                    z: data.z,
+                    contours: {
+                        coloring: 'heatmap',
+                        showlabels: true,
+                    },
+                    colorscale: 'Viridis'
+                }
+            ], {
+                title: '3D Transition State Surface with Contour Map',
                 autosize: true,
                 margin: { l: 0, r: 0, b: 0, t: 50 },
                 scene: {

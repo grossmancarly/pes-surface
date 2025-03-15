@@ -15,7 +15,7 @@
     <input type="range" id="Ea" min="0.1" max="5.0" step="0.1" value="2.5" oninput="updatePlot()">
     
     <label for="transition">Early/Late Transition State:</label>
-    <input type="range" id="transition" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updatePlot()">
+    <input type="range" id="transition" min="-2.0" max="2.0" step="0.1" value="0" oninput="updatePlot()">
     
     <label for="gamma">Gamma:</label>
     <input type="range" id="gamma" min="1.0" max="10.0" step="0.5" value="5.0" oninput="updatePlot()">
@@ -25,7 +25,7 @@
     
     <script>
         function generateSurface(Ea, transition, gamma, delta) {
-            let x = numeric.linspace(0.1, 5, 100); // Ensure positive values
+            let x = numeric.linspace(0.1, 5, 100); // Adjusted to ensure positive values
             let y = numeric.linspace(0.1, 5, 100);
             let Z = [];
 
@@ -33,16 +33,16 @@
             let beta = 1.0;
             let A = 1.0;
             let B = 1.0;
-            let x_ts_max = 2.5; // Default transition state x position
-            let s = transition * x_ts_max; // Adjusts transition state position
-            let q = A / (B + (s - x_ts_max)); // Ensures transition state stays on reaction path
+            let xs = 2.0;
+            let s = xs + transition; // Adjusted for early/late TS shift
+            let q = A / (B + (s - xs)); // Ensuring TS stays on reaction path
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
                 for (let j = 0; j < x.length; j++) {
                     let X = x[j];
                     let Y = y[i];
-                    let reactionPath = A / (B + (X - s)); // Maintains elbow shape
+                    let reactionPath = A / (B + (X - xs)); // Maintains elbow shape
                     let raw_Z = (alpha * (X - s) ** 2 - beta * (X - s) ** 4 + gamma * ((Y - q) - reactionPath) ** 2);
                     row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }

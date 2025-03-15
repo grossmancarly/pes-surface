@@ -7,26 +7,30 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h2>AB + C → ABC[TS] → A + BC</h2>
+    <h2>Reaction: AB + C → ABC[TS] → A + BC</h2>
     <div>
         <label for="EaSlider">Activation Energy (Ea): </label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
         <span id="EaValue">0.5</span>
 
-        <label for="aSlider">Early</label>
+        <label for="aSlider">Late ← Early/Late → Early: </label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
-        <label for="aSlider">Late</label>
         <span id="aValue">2</span>
     </div>
 
     <div id="plot"></div>
+    <div id="reactionPath"></div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 50;
         let zMax = 5; // Limit for z-values
 
         function generateData(k, a) {
-            let x = [], y = [], z = [], rxnPath = { x: [], y: [] };
+            let x = [];
+            let y = [];
+            let z = [];
+            let reactionPathX = [];
+            let reactionPathZ = [];
 
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
@@ -42,17 +46,16 @@
                     let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
                     let zv = Math.min(valley + peak, zMax);  // Cap at zMax
                     row.push(zv);
-                    
-                    // Capture reaction path where valley dominates
-                    if (Math.abs(zv - valley) < 0.1) {
-                        rxnPath.x.push(xv);
-                        rxnPath.y.push(yv);
+
+                    if (Math.abs(zv - (1 / (xv * yv))) < 0.05) { // Capture reaction path
+                        reactionPathX.push(xv);
+                        reactionPathZ.push(zv);
                     }
                 }
                 z.push(row);
             }
 
-            return { x, y, z, rxnPath };
+            return { x, y, z, reactionPathX, reactionPathZ };
         }
 
         function updatePlot() {
@@ -80,48 +83,49 @@
                 z: data.z,
                 contours: {
                     coloring: 'heatmap',
-                    showlabels: false,
+                    showlabels: true,
                 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };
 
-            let reactionPathTrace = {
+            let reactionPathPlot = {
                 type: 'scatter',
-                mode: 'lines',
-                x: data.rxnPath.x,
-                y: data.rxnPath.y,
-                line: { color: 'red', width: 3 },
-                name: 'Reaction Path'
+                x: data.reactionPathX,
+                y: data.reactionPathZ,
+                mode: 'lines+markers',
+                marker: { color: 'red' },
+                line: { color: 'red' },
+                name: 'Reaction Pathway'
             };
 
             let layout = {
                 title: '3D Transition State Surface with Contour Map',
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
-                height: 800,
+                height: 800, // Ensure enough height to separate the plots
                 margin: { l: 50, r: 50, b: 50, t: 50 },
                 xaxis: { title: 'rAB Distance' },
                 yaxis: { title: 'rBC Distance' },
                 scene: {
-                    domain: { row: 0, column: 0 },
+                    domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
                     xaxis: { title: 'rAB Distance' },
                     yaxis: { title: 'rBC Distance' },
                     zaxis: { title: 'V(rAB, rBC)', range: [null, zMax] }
                 },
-                xaxis2: { title: 'rAB Distance', anchor: 'y2' },
-                yaxis2: { 
-                    title: 'rBC Distance', 
-                    anchor: 'x2', 
-                    scaleanchor: 'x2', 
-                    scaleratio: 1 
-                }
+                xaxis2: { title: 'Reaction Coordinate' },
+                yaxis2: { title: 'Energy', scaleanchor: 'x2', scaleratio: 1 }
             };
 
             Plotly.newPlot('plot', [
-                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' },
-                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' },
-                reactionPathTrace
+                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' }, // 3D surface on top
+                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }  // Contour on bottom
             ], layout);
+
+            Plotly.newPlot('reactionPath', [reactionPathPlot], {
+                title: 'Energy vs. Reaction Coordinate',
+                xaxis: { title: 'Reaction Coordinate' },
+                yaxis: { title: 'Energy' }
+            });
         }
 
         updatePlot(); // Initialize the plot

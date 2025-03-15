@@ -7,108 +7,94 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h2>AB + C → ABC‡ → A + BC</h2> <!-- Reaction equation at the top -->
     <div>
-        <label for="EaSlider">Activation Energy (Ea): </label>
+        <label for="EaSlider">Activation Energy: </label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
-        <span id="EaValue">0.5</span>
-
-        <label for="aSlider">Early/Late (a): </label>
+        
+        <label for="aSlider">Early/Late Transition: </label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
-        <span id="aValue">2</span>
     </div>
 
     <div id="plot"></div>
 
     <script>
-        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 50;
-        let zMax = 5; // Limit for z-values
+        let steps = 50;
 
         function generateData(k, a) {
-            let x = [];
-            let y = [];
+            let rAB = [];
+            let rBC = [];
             let z = [];
 
             for (let i = 0; i < steps; i++) {
-                x.push(xMin + (xMax - xMin) * i / (steps - 1));
-                y.push(yMin + (yMax - yMin) * i / (steps - 1));
+                rAB.push(i / (steps - 1));
+                rBC.push(i / (steps - 1));
             }
 
             for (let i = 0; i < steps; i++) {
                 let row = [];
                 for (let j = 0; j < steps; j++) {
-                    let xv = x[i];
-                    let yv = y[j];
-                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                    let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
-                    let zv = Math.min(valley + peak, zMax);  // Cap at zMax
-                    row.push(zv);
+                    let rab = rAB[i];
+                    let rbc = rBC[j];
+                    let valley = 1 / (rab * rbc) + Math.log(rab * rbc);
+                    let peak = k * Math.exp(-((rab - a) ** 2 + (rbc - 1/a) ** 2));
+                    row.push(valley + peak);
                 }
                 z.push(row);
             }
 
-            return { x, y, z };
+            return { rAB, rBC, z };
         }
 
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let a = parseFloat(document.getElementById("aSlider").value);
-            document.getElementById("EaValue").innerText = k;
-            document.getElementById("aValue").innerText = a;
-
+            
             let data = generateData(k, a);
 
             let surfacePlot = {
                 type: 'surface',
-                x: data.x,
-                y: data.y,
+                x: data.rAB,
+                y: data.rBC,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false,
-                name: 'Surface Plot'
+                showscale: false
             };
 
             let contourPlot = {
                 type: 'contour',
-                x: data.x,
-                y: data.y,
+                x: data.rAB,
+                y: data.rBC,
                 z: data.z,
-                contours: {
-                    coloring: 'heatmap',
-                    showlabels: true,
-                },
+                contours: { coloring: 'heatmap', showlabels: false },
                 colorscale: 'Viridis',
-                name: 'Contour Map'
+                line: { width: 0 }, // Removes gridline artifacts
             };
 
             let layout = {
-                title: '3D Transition State Surface with Contour Map',
-                grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
-                height: 800, // Ensure enough height to separate the plots
+                title: '', // Removes title
+                grid: { rows: 2, columns: 1, pattern: 'independent' },
+                height: 800,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'X' },
-                yaxis: { title: 'Y' },
+                xaxis: { title: 'rAB Distance', showticklabels: false },
+                yaxis: { title: 'rBC Distance', showticklabels: false },
                 scene: {
-                    domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
-                    xaxis: { title: 'X' },
-                    yaxis: { title: 'Y' },
-                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
+                    domain: { row: 0, column: 0 },
+                    xaxis: { title: 'rAB Distance', showticklabels: false },
+                    yaxis: { title: 'rBC Distance', showticklabels: false },
+                    zaxis: { title: 'Energy' }
                 },
-                xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
-                yaxis2: { 
-                    title: 'Y', 
-                    anchor: 'x2', 
-                    scaleanchor: 'x2', // Forces equal scaling
-                    scaleratio: 1 // Ensures 1:1 aspect ratio
-                }
+                xaxis2: { title: 'rAB Distance', anchor: 'y2', showticklabels: false },
+                yaxis2: { title: 'rBC Distance', anchor: 'x2', scaleanchor: 'x2', scaleratio: 1, showticklabels: false }
             };
 
             Plotly.newPlot('plot', [
-                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' }, // 3D surface on top
-                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }  // Contour on bottom
+                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' },
+                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }
             ], layout);
         }
 
-        updatePlot(); // Initialize the plot
+        updatePlot();
     </script>
 </body>
 </html>

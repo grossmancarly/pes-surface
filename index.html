@@ -63,7 +63,7 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false, 
+                showscale: false,
                 name: 'Surface Plot'
             };
 
@@ -82,21 +82,24 @@
 
             let layout = {
                 title: '3D Transition State Surface with Contour Map',
-                autosize: true,
+                grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
+                height: 800, // Ensure enough height to separate the plots
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                grid: { rows: 2, columns: 1, pattern: 'independent' },
                 xaxis: { title: 'X' },
                 yaxis: { title: 'Y' },
                 scene: {
+                    domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
                     xaxis: { title: 'X' },
                     yaxis: { title: 'Y' },
                     zaxis: { title: 'V(X, Y)', range: [null, zMax] }
-                }
+                },
+                xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
+                yaxis2: { title: 'Y', anchor: 'x2' }  // Separate y-axis for contour
             };
 
             Plotly.newPlot('plot', [
-                { ...surfacePlot, domain: { row: 0, column: 0 } }, // 3D Surface in row 1
-                { ...contourPlot, domain: { row: 1, column: 0 } }  // Contour in row 2
+                { ...surfacePlot, xaxis: 'x', yaxis: 'y', scene: 'scene' }, // 3D surface on top
+                { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }  // Contour on bottom
             ], layout);
         }
 

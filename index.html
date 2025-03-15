@@ -18,24 +18,27 @@
     
     <script>
         function generateSurface(Ea, transition) {
-            let x = numeric.linspace(0.5, 3, 100); // Restricting x to positive values
-            let y = numeric.linspace(0, 3, 100);
+            let xMax = 5 * transition;
+            let yMax = 5 * Ea;
+            let x = numeric.linspace(0.1, xMax, 100); // Ensure x > 0
+            let y = numeric.linspace(0.1, yMax, 100); // Ensure y > 0
             let Z = [];
 
-            let A = Ea;
-            let B = 1.0;
-            let C = 5.0;
-            let D = 1.0;
-            let xs = transition;
+            let alpha = Ea;
+            let beta = 1.0;
+            let A = 1.0;
+            let B = transition;
+            let gamma = 5.0;
+            let delta = 0.05;
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
                 for (let j = 0; j < x.length; j++) {
                     let X = x[j];
                     let Y = y[i];
-                    let Y_path = D / X;
-                    let raw_Z = (-A / X + B * (X - xs) ** 2 + C * (Y - Y_path) ** 2);
-                    row.push(raw_Z);
+                    let reactionPath = A / (X + 1); // Elbow-shaped path
+                    let raw_Z = (-alpha * (X - B) ** 2 + beta * (X - B) ** 4 + gamma * (Y - reactionPath) ** 2);
+                    row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }
                 Z.push(row);
             }
@@ -48,10 +51,12 @@
             let transition = parseFloat(document.getElementById('transition').value);
             
             let surfaceData = generateSurface(Ea, transition);
-            let surface = { type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' };
-            let contour = { type: 'contour', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet', showscale: false };
+            let data = [
+                { type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' },
+                { type: 'contour', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet', showscale: false }
+            ];
             
-            Plotly.newPlot('plot', [surface, contour]);
+            Plotly.newPlot('plot', data);
         }
 
         updatePlot(); // Initial plot on page load

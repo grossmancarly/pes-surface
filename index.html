@@ -9,6 +9,7 @@
 <body>
     <h2>Interactive PES Surface</h2>
     <div id="plot"></div>
+    <div id="contour"></div>
     
     <label for="Ea">Activation Energy (Ea):</label>
     <input type="range" id="Ea" min="0.1" max="5.0" step="0.1" value="2.5" oninput="updatePlot()">
@@ -16,25 +17,29 @@
     <label for="transition">Early/Late Transition State:</label>
     <input type="range" id="transition" min="0.1" max="5.0" step="0.1" value="2.5" oninput="updatePlot()">
     
+    <label for="gamma">Gamma:</label>
+    <input type="range" id="gamma" min="1.0" max="10.0" step="0.5" value="5.0" oninput="updatePlot()">
+    
+    <label for="delta">Delta:</label>
+    <input type="range" id="delta" min="0.01" max="0.1" step="0.01" value="0.05" oninput="updatePlot()">
+    
     <script>
-        function generateSurface(Ea, transition) {
-            let x = numeric.linspace(-1, 5, 100); // Adjusted range for better visibility
-            let y = numeric.linspace(-1, 5, 100);
+        function generateSurface(Ea, transition, gamma, delta) {
+            let x = numeric.linspace(0.1, 5, 100); // Adjusted to ensure positive values
+            let y = numeric.linspace(0.1, 5, 100);
             let Z = [];
 
             let alpha = Ea;
             let beta = 1.0;
             let A = 1.0;
             let B = transition;
-            let gamma = 5.0;
-            let delta = 0.05;
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
                 for (let j = 0; j < x.length; j++) {
                     let X = x[j];
                     let Y = y[i];
-                    let reactionPath = A / (B + X); // Adjusted to ensure elbow shape
+                    let reactionPath = A / (B + X); // Maintains elbow shape
                     let raw_Z = (alpha * X ** 2 - beta * X ** 4 + gamma * (Y - reactionPath) ** 2);
                     row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }
@@ -47,11 +52,15 @@
         function updatePlot() {
             let Ea = parseFloat(document.getElementById('Ea').value);
             let transition = parseFloat(document.getElementById('transition').value);
+            let gamma = parseFloat(document.getElementById('gamma').value);
+            let delta = parseFloat(document.getElementById('delta').value);
             
-            let surfaceData = generateSurface(Ea, transition);
-            let data = [{ type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];
+            let surfaceData = generateSurface(Ea, transition, gamma, delta);
+            let surfacePlot = [{ type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];
+            let contourPlot = [{ type: 'contour', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];
             
-            Plotly.newPlot('plot', data);
+            Plotly.newPlot('plot', surfacePlot);
+            Plotly.newPlot('contour', contourPlot);
         }
 
         updatePlot(); // Initial plot on page load

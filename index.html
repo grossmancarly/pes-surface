@@ -51,7 +51,8 @@
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let aSlider = parseFloat(document.getElementById("aSlider").value);
-            let a = 3.7 / aSlider + 0.3; // Nonlinear mapping: middle of slider -> a ≈ 1
+            let a = 4.3 - aSlider; // Flip so right is late
+
 
 
             let data = generateData(k, a);

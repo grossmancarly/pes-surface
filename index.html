@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Surface Plot</title>
+    <title>3D Transition State Surface</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div id="plot"></div>
 
     <script>
-        // Generate grid data
         let x = [];
         let y = [];
         let z = [];
 
-        let xMin = -0.1, xMax = 2, yMin = -0.1, yMax = 2, steps = 50;
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 50;
+        let k = 2;  // Activation energy height
+        let a = 2;  // Controls early vs. late transition state
+        let zMax = 5;  // Limit for z-values
+
         for (let i = 0; i < steps; i++) {
             x.push(xMin + (xMax - xMin) * i / (steps - 1));
             y.push(yMin + (yMax - yMin) * i / (steps - 1));
@@ -26,13 +29,14 @@
             for (let j = 0; j < steps; j++) {
                 let xv = x[i];
                 let yv = y[j];
-                let zv = 1 / (xv * yv) + Math.log(xv * yv);
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
+                let zv = Math.min(valley + peak, zMax);  // Cap at zMax
                 row.push(zv);
             }
             z.push(row);
         }
 
-        // Create the surface plot
         let data = [{
             type: 'surface',
             x: x,
@@ -42,13 +46,13 @@
         }];
 
         let layout = {
-            title: '3D Surface Plot of V(x, y) = 1/xy + ln(xy)',
+            title: '3D Potential Surface with Adjustable Transition State',
             autosize: true,
             margin: { l: 0, r: 0, b: 0, t: 50 },
             scene: {
                 xaxis: { title: 'X' },
                 yaxis: { title: 'Y' },
-                zaxis: { title: 'V(X, Y)' }
+                zaxis: { title: 'V(X, Y)', range: [null, zMax] }
             }
         };
 

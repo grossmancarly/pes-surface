@@ -66,7 +66,7 @@
             path.x.push(data.x[i]);
             path.y.push(data.y[minJ]);
             path.z.push(minZ);
-            path.coord.push(1 - (i - steps * 0.1) / (steps - 1)); // Flip the coordinate
+            path.coord.push((i - steps * 0.1) / (steps - 1));
 
         }
     }
@@ -76,7 +76,8 @@
 
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
-            let a = parseFloat(document.getElementById("aSlider").value);
+            let aSlider = parseFloat(document.getElementById("aSlider").value);
+            let a = 4.3 - aSlider; // Flip so right is late
 
             let data = generateData(k, a);
             let reactionPath = getReactionPath(data);

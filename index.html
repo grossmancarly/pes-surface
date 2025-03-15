@@ -27,11 +27,6 @@
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
 
-        // Function to transform slider value
-        function transformSliderValue(aSlider) {
-            return -0.296 * Math.pow(aSlider, 2) + 1.8134 * aSlider - 1.5174;
-        }
-
         function generateData(k, a) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
@@ -56,7 +51,9 @@
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let aSlider = parseFloat(document.getElementById("aSlider").value);
-            let a = transformSliderValue(aSlider); // Use transformed a value
+            let a = 4.3 - aSlider; // Flip so right is late
+
+
 
             let data = generateData(k, a);
 
@@ -66,7 +63,7 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false,
+                showscale: false, // Hide the color scale
                 name: 'Surface Plot'
             };
 
@@ -80,8 +77,21 @@
                 name: 'Contour Map'
             };
 
+            /*
+            // Reaction coordinate plot - commented out for now
+            let reactionPath = getReactionPath(data);
+            let reactionPathPlot = {
+                type: 'scatter',
+                mode: 'lines',
+                x: reactionPath.coord,
+                y: reactionPath.z,
+                line: { color: 'blue', width: 3 },
+                name: 'Reaction Path'
+            };
+            */
+
             let layout = {
-                showlegend: false,
+                showlegend: false, // Hide legend
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
                 height: 800,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
@@ -93,6 +103,7 @@
             Plotly.newPlot('plot', [
                 { ...surfacePlot, scene: 'scene' },
                 { ...contourPlot, xaxis: 'x2', yaxis: 'y2' }
+                // { ...reactionPathPlot, xaxis: 'x3', yaxis: 'y3' } // Commented out
             ], layout);
         }
 

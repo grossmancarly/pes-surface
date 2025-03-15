@@ -7,14 +7,13 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h2>AB + C → ABC‡ → A + BC</h2>
     <div>
-        <label for="EaSlider">Activation Energy (Ea): </label>
+        <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
-        <span id="EaValue">0.5</span>
 
-        <label for="aSlider">Early/Late (a): </label>
+        <label for="aSlider">Early/Late:</label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
-        <span id="aValue">2</span>
     </div>
 
     <div id="plot"></div>
@@ -52,8 +51,6 @@
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let a = parseFloat(document.getElementById("aSlider").value);
-            document.getElementById("EaValue").innerText = k;
-            document.getElementById("aValue").innerText = a;
 
             let data = generateData(k, a);
 
@@ -74,31 +71,32 @@
                 z: data.z,
                 contours: {
                     coloring: 'heatmap',
-                    showlabels: true,
+                    showlabels: false,
                 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };
 
             let layout = {
-                title: '3D Transition State Surface with Contour Map',
+                title: '',
                 grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
                 height: 800, // Ensure enough height to separate the plots
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'X' },
-                yaxis: { title: 'Y' },
+                xaxis: { title: 'rAB distance', showticklabels: false },
+                yaxis: { title: 'rBC distance', showticklabels: false },
                 scene: {
                     domain: { row: 0, column: 0 }, // Assigns 3D plot to top row
-                    xaxis: { title: 'X' },
-                    yaxis: { title: 'Y' },
-                    zaxis: { title: 'V(X, Y)', range: [null, zMax] }
+                    xaxis: { title: 'rAB distance', showticklabels: false },
+                    yaxis: { title: 'rBC distance', showticklabels: false },
+                    zaxis: { title: '', range: [null, zMax] }
                 },
-                xaxis2: { title: 'X', anchor: 'y2' }, // Separate x-axis for contour
+                xaxis2: { title: 'rAB distance', anchor: 'y2', showticklabels: false }, // Separate x-axis for contour
                 yaxis2: { 
-                    title: 'Y', 
+                    title: 'rBC distance', 
                     anchor: 'x2', 
                     scaleanchor: 'x2', // Forces equal scaling
-                    scaleratio: 1 // Ensures 1:1 aspect ratio
+                    scaleratio: 1, // Ensures 1:1 aspect ratio
+                    showticklabels: false
                 }
             };
 

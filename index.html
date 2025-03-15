@@ -7,41 +7,36 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h2> PES Surface</h2>
+    <h2>Interactive PES Surface</h2>
     <div id="plot"></div>
     
-    <label for="a">a:</label>
-    <input type="range" id="a" min="0.1" max="1.0" step="0.1" value="0.5" oninput="updatePlot()">
+    <label for="Ea">Activation Energy (Ea):</label>
+    <input type="range" id="Ea" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updatePlot()">
     
-    <label for="b">b:</label>
-    <input type="range" id="b" min="-2" max="0" step="0.1" value="-1" oninput="updatePlot()">
-    
-    <label for="c">c:</label>
-    <input type="range" id="c" min="0.1" max="1.0" step="0.1" value="0.5" oninput="updatePlot()">
-    
-    <label for="d">d:</label>
-    <input type="range" id="d" min="0.5" max="2.0" step="0.1" value="1" oninput="updatePlot()">
-    
-    <label for="e">e:</label>
-    <input type="range" id="e" min="0.01" max="0.1" step="0.01" value="0.05" oninput="updatePlot()">
+    <label for="transition">Early/Late Transition State:</label>
+    <input type="range" id="transition" min="0.5" max="3.0" step="0.1" value="1.5" oninput="updatePlot()">
     
     <script>
-        function generateSurface(a, b, c, d, e) {
+        function generateSurface(Ea, transition) {
             let x = numeric.linspace(-3, 3, 100);
             let y = numeric.linspace(-3, 3, 100);
             let Z = [];
+
+            let alpha = Ea;
+            let beta = 1.0;
+            let A = 1.0;
+            let B = transition;
+            let gamma = 5.0;
+            let delta = 0.05;
 
             for (let i = 0; i < y.length; i++) {
                 let row = [];
                 for (let j = 0; j < x.length; j++) {
                     let X = x[j];
                     let Y = y[i];
-                    if (X ** 2 + Y ** 2 <= 9) {
-                        let raw_Z = (a * X ** 4 + b * X ** 2 + c * (Y - (Math.cos(d * X) + 0.3 * X) ** 2) ** 2);
-                        row.push(raw_Z / Math.sqrt(1 + e * raw_Z ** 2));
-                    } else {
-                        row.push(NaN);
-                    }
+                    let reactionPath = A * Math.tanh(B * X);
+                    let raw_Z = (-alpha * X ** 2 + beta * X ** 4 + gamma * (Y - reactionPath) ** 2);
+                    row.push(raw_Z / Math.sqrt(1 + delta * raw_Z ** 2));
                 }
                 Z.push(row);
             }
@@ -50,13 +45,10 @@
         }
 
         function updatePlot() {
-            let a = parseFloat(document.getElementById('a').value);
-            let b = parseFloat(document.getElementById('b').value);
-            let c = parseFloat(document.getElementById('c').value);
-            let d = parseFloat(document.getElementById('d').value);
-            let e = parseFloat(document.getElementById('e').value);
+            let Ea = parseFloat(document.getElementById('Ea').value);
+            let transition = parseFloat(document.getElementById('transition').value);
             
-            let surfaceData = generateSurface(a, b, c, d, e);
+            let surfaceData = generateSurface(Ea, transition);
             let data = [{ type: 'surface', x: surfaceData.x, y: surfaceData.y, z: surfaceData.z, colorscale: 'Jet' }];
             
             Plotly.newPlot('plot', data);

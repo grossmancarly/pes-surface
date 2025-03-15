@@ -3,48 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Transition State Surface with Contour</title>
+    <title>3D Transition State Surface with Contour and Reaction Path</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .slider-label {
-            flex: 1;
-            text-align: center;
-        }
-        input[type=range] {
-            flex: 3;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 10px;
-            height: 10px;
-            background: black;
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
-    <h2 style="text-align: center;">AB + C → ABC[TS] → A + BC</h2>
-    <div class="slider-container">
-        <span class="slider-label">Late</span>
+    <div>
+        <label for="EaSlider">Activation Energy: </label>
+        <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.5" oninput="updatePlot()">
+        
+        <label for="aSlider">Late &larr; Early: </label>
         <input type="range" id="aSlider" min="0.3" max="4" step="0.1" value="2" oninput="updatePlot()">
-        <span class="slider-label">Early</span>
     </div>
-    <div id="plot"></div>
-    <div id="reaction-coordinate-plot"></div>
-    <script>
-        let xMin = 0.2, xMax = 5, yMin = 0.2, yMax = 5, steps = 100;
-        let zMax = 5;
 
-        function generateData(a) {
+    <div id="plot"></div>
+
+    <script>
+        let xMin = 0.5, xMax = 5, yMin = 0.5, yMax = 5, steps = 100;
+        let zMax = 5; 
+
+        function generateData(k, a) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
@@ -56,7 +33,7 @@
                     let xv = x[i];
                     let yv = y[j];
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                    let peak = Math.exp(-((xv - a) ** 2 + (yv - 1 / a) ** 2));
+                    let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
                     let zv = Math.min(valley + peak, zMax);
                     row.push(zv);
                 }
@@ -65,82 +42,78 @@
             return { x, y, z };
         }
 
-        function extractReactionPath(data) {
-            let path = [];
-            let totalDistance = 0;
+        function generateReactionPath(k, a) {
+            let pathX = [], pathY = [], pathZ = [], pathCoord = [];
             for (let i = 0; i < steps; i++) {
-                let minZ = Math.min(...data.z[i]);
-                let minIndex = data.z[i].indexOf(minZ);
-                let xv = data.x[i];
-                let yv = data.y[minIndex];
-                if (path.length > 0) {
-                    let dx = xv - path[path.length - 1].x;
-                    let dy = yv - path[path.length - 1].y;
-                    totalDistance += Math.sqrt(dx * dx + dy * dy);
-                }
-                path.push({ x: xv, y: yv, z: minZ, s: totalDistance });
+                let s = i / (steps - 1);
+                let xv = xMin + s * (xMax - xMin);
+                let yv = 1 / xv; 
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-((xv - a) ** 2 + (yv - 1/a) ** 2));
+                let zv = Math.min(valley + peak, zMax);
+                pathX.push(s);
+                pathY.push(zv);
             }
-            return path;
+            return { pathX, pathY };
         }
 
         function updatePlot() {
+            let k = parseFloat(document.getElementById("EaSlider").value);
             let a = parseFloat(document.getElementById("aSlider").value);
-            let data = generateData(a);
-            let reactionPath = extractReactionPath(data);
+
+            let data = generateData(k, a);
+            let reactionPath = generateReactionPath(k, a);
+
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false
+                showscale: false,
+                name: 'Potential Surface'
             };
+
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
                 y: data.y,
                 z: data.z,
-                contours: { coloring: 'heatmap', showlabels: false },
-                colorscale: 'Viridis'
+                contours: {
+                    coloring: 'heatmap',
+                    showlabels: false
+                },
+                colorscale: 'Viridis',
+                name: 'Contour Map'
             };
-            let reactionPathTrace = {
-                type: 'scatter3d',
-                mode: 'lines',
-                x: reactionPath.map(p => p.x),
-                y: reactionPath.map(p => p.y),
-                z: reactionPath.map(p => p.z),
-                line: { color: 'red', width: 4 },
-                name: 'Reaction Path'
-            };
-            let reactionCoordPlot = {
+
+            let reactionPathPlot = {
                 type: 'scatter',
+                x: reactionPath.pathX,
+                y: reactionPath.pathY,
                 mode: 'lines',
-                x: reactionPath.map(p => p.s),
-                y: reactionPath.map(p => p.z),
-                line: { color: 'black', width: 3 },
-                name: 'Energy Profile'
+                line: { color: 'red', width: 3 },
+                name: 'Reaction Coordinate'
             };
-            Plotly.newPlot('plot', [surfacePlot, reactionPathTrace, contourPlot], {
-                title: '3D Transition State Surface with Contour Map',
-                grid: { rows: 2, columns: 1, pattern: 'independent' },
+
+            let layout = {
+                title: 'ABC[TS] Reaction Surface and Coordinate',
+                grid: { rows: 2, columns: 1, pattern: 'independent', roworder: 'top to bottom' },
                 height: 800,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                scene: {
-                    xaxis: { title: 'rAB' },
-                    yaxis: { title: 'rBC' },
-                    zaxis: { title: 'V' }
-                },
-                xaxis2: { title: 'Reaction Coordinate' },
-                yaxis2: { title: 'Energy' }
-            });
-            Plotly.newPlot('reaction-coordinate-plot', [reactionCoordPlot], {
-                title: 'Energy vs Reaction Coordinate',
                 xaxis: { title: 'Reaction Coordinate' },
                 yaxis: { title: 'Energy' },
-                margin: { l: 50, r: 50, b: 50, t: 50 }
-            });
+                scene: {
+                    xaxis: { title: 'rAB Distance' },
+                    yaxis: { title: 'rBC Distance' },
+                    zaxis: { title: 'V' }
+                }
+            };
+
+            Plotly.newPlot('plot', [surfacePlot, contourPlot, reactionPathPlot], layout);
         }
-        updatePlot();
+
+        updatePlot(); 
     </script>
 </body>
 </html>

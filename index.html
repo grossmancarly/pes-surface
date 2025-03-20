@@ -18,7 +18,7 @@
         .plot-container {
             width: 90%;
         }
-        .slider-container, .toggle-container {
+        .slider-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,18 +30,34 @@
         .slider {
             width: 100%;
             margin: 10px 0;
-            background: #ccc;
+            background: #ccc; /* Grey sliders */
             border-radius: 5px;
+        }
+        .toggle-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
+    <!-- 3D Surface Plot -->
     <div class="plot-container">
         <div id="plot-3D"></div>
     </div>
 
+    <!-- Sliders positioned above the contour map -->
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
@@ -55,10 +71,10 @@
         </div>
     </div>
 
-    <div class="toggle-container">
-        <label><input type="checkbox" id="toggleColor" onchange="updatePlot()"> Show Heatmap</label>
-    </div>
+    <!-- Toggle Button for Contour Coloring -->
+    <button class="toggle-button" onclick="toggleContourColor()">Toggle Contour Coloring</button>
 
+    <!-- Contour Plot -->
     <div class="plot-container">
         <div id="plot-contour"></div>
     </div>
@@ -66,6 +82,7 @@
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
+        let contourColoring = true; // Default to heatmap coloring
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -96,10 +113,11 @@
             let k = parseFloat(document.getElementById("EaSlider").value);
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let a = transformSliderValue(sliderValue);
-            let showHeatmap = document.getElementById("toggleColor").checked;
-
+        
             let data = generateData(k, a);
-            
+        
+            const zValues = data.z.flat().filter(v => !isNaN(v) && v !== undefined);
+        
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
@@ -109,15 +127,15 @@
                 showscale: false,
                 name: 'Surface Plot'
             };
-
+        
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
                 y: data.y,
                 z: data.z,
                 contours: { 
+                    coloring: contourColoring ? 'heatmap' : 'lines',
                     showlines: true, 
-                    coloring: showHeatmap ? 'heatmap' : 'none',
                     start: 1,  
                     end: 3, 
                     size: (3 - 1) / 8  
@@ -125,14 +143,14 @@
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };
-
+        
             let layout3D = {
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
                 scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
             };
-
+        
             let layoutContour = {
                 showlegend: false,
                 height: 500,
@@ -140,11 +158,16 @@
                 xaxis: { title: 'rBC' },
                 yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
             };
-
+        
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
         }
         
+        function toggleContourColor() {
+            contourColoring = !contourColoring;
+            updatePlot();
+        }
+
         updatePlot();
     </script>
 </body>

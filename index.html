@@ -96,9 +96,12 @@
             let k = parseFloat(document.getElementById("EaSlider").value);
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let a = transformSliderValue(sliderValue); // Convert slider value to a
-
+        
             let data = generateData(k, a);
-
+        
+            
+            const zValues = data.z.flat().filter(v => !isNaN(v) && v !== undefined);
+        
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
@@ -108,33 +111,30 @@
                 showscale: false,
                 name: 'Surface Plot'
             };
-
+        
             let contourPlot = {
-                
                 type: 'contour',
                 x: data.x,
                 y: data.y,
                 z: data.z,
-
-
-                const zValues = data.z.flat().filter(v => !isNaN(v) && v !== undefined);
                 contours: { 
                     coloring: 'heatmap', 
                     showlines: true, 
                     start: Math.min(...zValues),  
                     end: Math.max(...zValues),    
-                    size: (Math.max(...zValues) - Math.min(...zValues)) / 20 },
+                    size: (Math.max(...zValues) - Math.min(...zValues)) / 20  // More contour lines
+                },
                 colorscale: 'Plasma',
                 name: 'Contour Map'
             };
-
+        
             let layout3D = {
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
                 scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
             };
-
+        
             let layoutContour = {
                 showlegend: false,
                 height: 500,
@@ -142,12 +142,13 @@
                 xaxis: { title: 'rBC Distance' },
                 yaxis: { title: 'rAB Distance', scaleanchor: 'x', scaleratio: 1 }
             };
-
+        
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
         }
-
+        
         updatePlot();
+
     </script>
 </body>
 </html>

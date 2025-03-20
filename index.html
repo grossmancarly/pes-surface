@@ -30,19 +30,19 @@
         .slider {
             width: 100%;
             margin: 10px 0;
-            background: #ccc; /* Grey sliders */
+            background: #ccc;
             border-radius: 5px;
         }
         .toggle-button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
             background-color: #4CAF50;
             color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
         .toggle-button:hover {
             background-color: #45a049;
@@ -52,12 +52,10 @@
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
-    <!-- 3D Surface Plot -->
     <div class="plot-container">
         <div id="plot-3D"></div>
     </div>
 
-    <!-- Sliders positioned above the contour map -->
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
@@ -71,10 +69,8 @@
         </div>
     </div>
 
-    <!-- Toggle Button for Contour Coloring -->
-    <button class="toggle-button" onclick="toggleContourColor()">Toggle Contour Coloring</button>
+    <button class="toggle-button" onclick="toggleColoring()">Toggle Contour Coloring</button>
 
-    <!-- Contour Plot -->
     <div class="plot-container">
         <div id="plot-contour"></div>
     </div>
@@ -82,7 +78,7 @@
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
-        let contourColoring = true; // Default to heatmap coloring
+        let showColoring = true;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -116,8 +112,6 @@
         
             let data = generateData(k, a);
         
-            const zValues = data.z.flat().filter(v => !isNaN(v) && v !== undefined);
-        
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
@@ -134,11 +128,13 @@
                 y: data.y,
                 z: data.z,
                 contours: { 
-                    coloring: contourColoring ? 'heatmap' : 'lines',
+                    coloring: showColoring ? 'heatmap' : 'lines', 
                     showlines: true, 
                     start: 1,  
                     end: 3, 
-                    size: (3 - 1) / 8  
+                    size: (3 - 1) / 8,
+                    labelfont: { color: 'black', size: 14 },
+                    linewidth: 2  // Make contour lines thicker
                 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
@@ -162,12 +158,12 @@
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
         }
-        
-        function toggleContourColor() {
-            contourColoring = !contourColoring;
+
+        function toggleColoring() {
+            showColoring = !showColoring;
             updatePlot();
         }
-
+        
         updatePlot();
     </script>
 </body>

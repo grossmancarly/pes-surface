@@ -121,8 +121,9 @@
                     coloring: 'heatmap', 
                     showlines: true, 
                     start: Math.min(...zValues),  
-                    end: Math.max(...zValues),    
-                    size: (Math.max(...zValues) - Math.min(...zValues)) / 10  // More contour lines
+                    // end: Math.max(...zValues), 
+                    end: 4, 
+                    size: (4 - Math.min(...zValues)) / 10  
                 },
                 colorscale: 'Magma',
                 name: 'Contour Map'

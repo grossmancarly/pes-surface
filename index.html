@@ -104,7 +104,7 @@
                 x: data.x,
                 y: data.y,
                 z: data.z,
-                colorscale: 'Plasma',
+                colorscale: 'Plasma'.slice().reverse(),
                 showscale: false,
                 name: 'Surface Plot'
             };
@@ -117,10 +117,10 @@
                 contours: { 
                     coloring: 'heatmap', 
                     showlines: true, 
-                    start: data.z.min/2, 
+                    start: data.z.min, 
                     end: data.z.max, 
                     size: 10 },
-                colorscale: 'Plasma',
+                colorscale: 'Plasma'.slice().reverse(),
                 name: 'Contour Map'
             };
 

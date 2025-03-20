@@ -115,12 +115,15 @@
                 x: data.x,
                 y: data.y,
                 z: data.z,
+
+
+                const zValues = data.z.flat().filter(v => !isNaN(v) && v !== undefined);
                 contours: { 
                     coloring: 'heatmap', 
                     showlines: true, 
-                    start: Math.min(...data.z.flat()),  
-                    end: Math.max(...data.z.flat()),    
-                    size: 0.2 },
+                    start: Math.min(...zValues),  
+                    end: Math.max(...zValues),    
+                    size: (Math.max(...zValues) - Math.min(...zValues)) / 20 },
                 colorscale: 'Plasma',
                 name: 'Contour Map'
             };

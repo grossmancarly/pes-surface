@@ -107,57 +107,58 @@
         }
 
         function updatePlot() {
-            let k = parseFloat(document.getElementById("EaSlider").value);
-            let sliderValue = parseFloat(document.getElementById("aSlider").value);
-            let a = transformSliderValue(sliderValue);
-            let data = generateData(k, a);
-            
-            let surfacePlot = {
-                type: 'surface',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                colorscale: 'Viridis',
-                showscale: false
-            };
-            
-            let contourPlot = {
-                type: 'contour',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                contours: { 
-                    coloring: showHeatmap ? 'heatmap' : 'lines',
-                    showlines: true, 
-                    start: 1,  
-                    end: 3, 
-                    size: (3 - 1) / 8
-                },
-                line: {
-                    width: 3,
-                    color: 'black'
-                },
-                colorscale: 'Viridis'
-            };
+    let k = parseFloat(document.getElementById("EaSlider").value);
+    let sliderValue = parseFloat(document.getElementById("aSlider").value);
+    let a = transformSliderValue(sliderValue);
+    let data = generateData(k, a);
+    
+    let surfacePlot = {
+        type: 'surface',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false
+    };
+    
+    let contourPlot = {
+        type: 'contour',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        contours: { 
+            coloring: showHeatmap ? 'heatmap' : 'lines',
+            showlines: true, 
+            start: 1,  
+            end: 3, 
+            size: (3 - 1) / 8
+        },
+        line: {
+            width: showHeatmap ? 1 : 3,  // Thinner lines for heatmap, thicker for contour lines
+            color: 'black'
+        },
+        colorscale: 'Viridis'
+    };
 
-            let layout3D = {
-                showlegend: false,
-                height: 500,
-                margin: { l: 50, r: 50, b: 50, t: 50 },
-                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
-            };
+    let layout3D = {
+        showlegend: false,
+        height: 500,
+        margin: { l: 50, r: 50, b: 50, t: 50 },
+        scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
+    };
 
-            let layoutContour = {
-                showlegend: false,
-                height: 500,
-                margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'rBC' },
-                yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
-            };
+    let layoutContour = {
+        showlegend: false,
+        height: 500,
+        margin: { l: 50, r: 50, b: 50, t: 50 },
+        xaxis: { title: 'rBC' },
+        yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
+    };
 
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
-        }
+    Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+    Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+}
+
 
         function toggleContourColoring() {
             showHeatmap = !showHeatmap;

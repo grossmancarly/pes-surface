@@ -114,7 +114,7 @@
                 x: data.x,
                 y: data.y,
                 z: data.z,
-                contours: { coloring: 'heatmap', showlines: true, size: 2 },
+                contours: { coloring: 'heatmap', showlines: true, start: data.z.min, end: data.z.max, size: 0.1 },
                 colorscale: 'Viridis',
                 name: 'Contour Map'
             };

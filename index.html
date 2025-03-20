@@ -102,7 +102,7 @@
                     let yv = y[j];
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
                     let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
-                    let reactantEnergy = c * (1 / (xv + 2) - 1 / (1 + Math.exp(-((yv - 1) ** 2))));
+                    let reactantEnergy = c * (1 / (xv + 2) - 1 / (1 + Math.exp(-(yv - 1) ** 2)));
                     let zv = Math.min(valley + peak + reactantEnergy, zMax);
                     row.push(zv);
                 }
@@ -137,7 +137,7 @@
                     showlines: true, 
                     start: 1,  
                     end: 4, 
-                    size: (4 - 1) / (50)
+                    size: (4 - 1) / (40)
                 },
                 line: {
                     width: showHeatmap ? 1 : 3,  // Thinner lines for heatmap, thicker for contour lines

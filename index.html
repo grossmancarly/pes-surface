@@ -18,7 +18,7 @@
         .plot-container {
             width: 90%;
         }
-        .slider-container {
+        .slider-container, .button-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,18 +34,17 @@
             border-radius: 5px;
         }
         .toggle-button {
-            background-color: #4CAF50;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007BFF;
             color: white;
             border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-            cursor: pointer;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
+            cursor: pointer;
+            transition: background 0.3s;
         }
         .toggle-button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -69,7 +68,9 @@
         </div>
     </div>
 
-    <button class="toggle-button" onclick="toggleColoring()">Toggle Contour Coloring</button>
+    <div class="button-container">
+        <button id="toggleContour" class="toggle-button" onclick="toggleContourColoring()">Toggle Contour Heatmap</button>
+    </div>
 
     <div class="plot-container">
         <div id="plot-contour"></div>
@@ -78,7 +79,7 @@
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
-        let showColoring = true;
+        let showHeatmap = true;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -109,44 +110,43 @@
             let k = parseFloat(document.getElementById("EaSlider").value);
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let a = transformSliderValue(sliderValue);
-        
             let data = generateData(k, a);
-        
+            
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: false,
-                name: 'Surface Plot'
+                showscale: false
             };
-        
+            
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
                 y: data.y,
                 z: data.z,
                 contours: { 
-                    coloring: showColoring ? 'heatmap' : 'lines', 
+                    coloring: showHeatmap ? 'heatmap' : 'lines',
                     showlines: true, 
                     start: 1,  
                     end: 3, 
-                    size: (3 - 1) / 8,
-                    labelfont: { color: 'black', size: 14 },
-                    linewidth: 4  // Make contour lines thicker
+                    size: (3 - 1) / 8
                 },
-                colorscale: 'Viridis',
-                name: 'Contour Map'
+                line: {
+                    width: 3,
+                    color: 'black'
+                },
+                colorscale: 'Viridis'
             };
-        
+
             let layout3D = {
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
                 scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
             };
-        
+
             let layoutContour = {
                 showlegend: false,
                 height: 500,
@@ -154,13 +154,13 @@
                 xaxis: { title: 'rBC' },
                 yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
             };
-        
+
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
         }
 
-        function toggleColoring() {
-            showColoring = !showColoring;
+        function toggleContourColoring() {
+            showHeatmap = !showHeatmap;
             updatePlot();
         }
         

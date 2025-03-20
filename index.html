@@ -110,6 +110,7 @@
             };
 
             let contourPlot = {
+                
                 type: 'contour',
                 x: data.x,
                 y: data.y,
@@ -117,9 +118,9 @@
                 contours: { 
                     coloring: 'heatmap', 
                     showlines: true, 
-                    start: data.z.min, 
-                    end: data.z.max, 
-                    size: 10 },
+                    start: Math.min(...data.z.flat()),  
+                    end: Math.max(...data.z.flat()),    
+                    size: 0.2 },
                 colorscale: 'Plasma'.slice().reverse(),
                 name: 'Contour Map'
             };

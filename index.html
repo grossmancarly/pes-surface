@@ -84,6 +84,7 @@
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
         let showHeatmap = true;
+        let s = 0.4, p = 5;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -102,8 +103,7 @@
                     let yv = y[j];
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
                     let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
-                    let s=0.4;
-                    let p = 5;
+                
                     let reactantEnergy = c *(s(1+Math.exp(-(p*(x-a))))**(-1));
                     let zv = Math.min(valley + peak + reactantEnergy, zMax);
                     row.push(zv);

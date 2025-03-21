@@ -208,11 +208,18 @@
 
             let layoutReactionCoordinate = {
                 title: "Reaction Coordinate vs. V",
-                xaxis: { title: "Reaction Coordinate (s)" },
-                yaxis: { title: "V (Potential Energy)" },
+                xaxis: { 
+                    title: "Reaction Coordinate (s)",
+                    range: [0, 5]  // Focus on the region with significant energy changes
+                },
+                yaxis: { 
+                    title: "V (Potential Energy)",
+                    range: [0, zMax]  // Adjust the range of the y-axis if needed
+                },
                 height: 400,
                 margin: { l: 50, r: 50, b: 50, t: 50 }
             };
+
 
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);

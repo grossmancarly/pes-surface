@@ -182,13 +182,15 @@
         z: data.z,
         colorscale: 'Viridis',
         showscale: false
-        layout: {
-    scene: {
-        xaxis: { title: 'rAB' },  // Set the x-axis label
-        yaxis: { title: 'rBC' },  // Set the y-axis label
-        zaxis: { title: 'V' }     // Set the z-axis label
-    }
-}
+    };
+
+    // Correctly add layout to surface plot
+    surfacePlot.layout = {
+        scene: {
+            xaxis: { title: 'rAB' },  // Set the x-axis label
+            yaxis: { title: 'rBC' },  // Set the y-axis label
+            zaxis: { title: 'V' }     // Set the z-axis label
+        }
     };
 
     // Contour plot (always visible)
@@ -209,12 +211,12 @@
             color: 'black'
         },
         colorscale: 'Viridis'
-        layout: {
-    scene: {
+    };
+
+    // Correctly add layout to contour plot
+    contourPlot.layout = {
         xaxis: { title: 'rAB' },  // Set the x-axis label
-        yaxis: { title: 'rBC' },  // Set the y-axis label
-    }
-}
+        yaxis: { title: 'rBC' }   // Set the y-axis label
     };
 
     // Reaction Pathway Plot
@@ -273,6 +275,7 @@
     Plotly.react("plot-3D", [surfacePlot]);
     Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
 }
+
 
 
 

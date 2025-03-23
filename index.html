@@ -66,10 +66,16 @@
             height: 500px;
             margin-top: 20px;
         }
+        #right-side-container {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            grid-gap: 10px;
+            width: 48%; /* Make it take up half the width */
+        }
         #toggleHeatmapContainer {
-            position: absolute;
-            top: 520px; /* Positioned above the contour map */
-            right: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             z-index: 10;
         }
     </style>
@@ -79,7 +85,14 @@
 
     <div class="plot-container">
         <div id="plot-3D" class="plot"></div>
-        <div id="plot-contour" class="plot"></div>
+        
+        <!-- Right side grid container -->
+        <div id="right-side-container">
+            <div id="toggleHeatmapContainer">
+                <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
+            </div>
+            <div id="plot-contour" class="plot"></div>
+        </div>
     </div>
 
     <div class="slider-container">
@@ -102,11 +115,6 @@
     </div>
 
     <div id="reaction-plot"></div>
-
-    <!-- Toggle Heatmap Button positioned above the contour plot -->
-    <div id="toggleHeatmapContainer">
-        <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
-    </div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;

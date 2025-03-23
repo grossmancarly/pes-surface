@@ -206,21 +206,29 @@
             };
 
             // Layout for contour plot
-            let layoutContour = {
-                showlegend: false,
-                height: 500,
-                margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'rBC' },
-                yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
-            };
+let layoutContour = {
+    showlegend: false,
+    height: 500,
+    margin: { l: 50, r: 50, b: 50, t: 50 },
+    xaxis: { 
+        title: 'rBC',
+        range: [0, 5]  // Limit x-axis range from 0 to 5
+    },
+    yaxis: { 
+        title: 'rAB',
+        scaleanchor: 'x', 
+        scaleratio: 1,
+        range: [0, 5]  // Limit y-axis range from 0 to 5
+    }
+};
 
             // Layout for reaction plot (V vs X)
             let layoutReaction = {
                 showlegend: false,
                 height: 500,
                 margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { title: 'Potential (V)' },
-                yaxis: { title: 'Reaction Coordinate (X)' }
+                xaxis: { title: 'Reaction Coordinate' },
+                yaxis: { title: 'Potential (V)' }
             };
 
             // Plot the graphs

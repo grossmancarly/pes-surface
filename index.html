@@ -55,84 +55,53 @@
     <div class="plot-container" id="plot-3D"></div>
     <div class="plot-container" id="plot-contour"></div>
     <div class="plot-container" id="plot-reaction-coordinate"></div>
-    
-    <!-- New X vs s and V vs s plots -->
     <div class="plot-container" id="plot-X-vs-s"></div>
     <div class="plot-container" id="plot-V-vs-s"></div>
+    <div class="plot-container" id="plot-parametric"></div>  <!-- New parametric plot -->
 
     <script>
-        let xMin = 0.2, xMax = 5, steps = 100;
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
-        let showHeatmap = true;
+        let p = 5;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
-        let p = 5;
-        let h = 0.5;  // width parameter for the Gaussian term
-
-        function computeV(s) {
+        function computeReactionCoordinate() {
+            let s = [5];
             let dx = (xMax - xMin) / (steps - 1);
-            let integral = 0;
-            
-            for (let i = steps - 1; i >= 0; i--) {
-                let x = xMin + i * dx;
-                if (x > s) continue;
-                let f_x = Math.sqrt(x ** 4 + 1) / (x ** 2);
-                integral += f_x * dx;
+            for (let i = 1; i < steps; i++) {
+                let xi = xMin + i * dx;
+                let ds = Math.sqrt(xi ** 4 + 1) / (xi ** 2) * dx;
+                s.push(s[i - 1] + ds);
             }
-            
-            return integral;
+            return s;
         }
 
-        function generateVvsSData() {
-            let s = [], V = [];
-            let ds = (xMax - xMin) / (steps - 1);
-            
-            for (let i = 0; i < steps; i++) {
-                let si = xMin + i * ds;
-                s.push(si);
-                V.push(computeV(si));
-            }
-            
-            return { s, V };
+        function VofS(s) {
+            return Math.log(s + 1);  // Example form, replace with your exact expression
         }
 
-        function generateXvsSData(k, a, c) {
-            let s = [], x = [];
-            let ds = (xMax - xMin) / (steps - 1);
-            
-            for (let i = 0; i < steps; i++) {
-                let si = xMin + i * ds;
-                let xi = 1 + k * Math.exp(-((si - a) ** 2 / h + (1 / si - 1 / a) ** 2 / h))
-                    + c * (1 + Math.exp(-p * (1 / si - 1 / a))) ** -1;
-
-                s.push(si);
-                x.push(xi);
-            }
-            
-            return { s, x };
+        function XofS(s, k = 0.75, a = 2, h = 1.0, c = 0.5) {
+            return 1 + k * Math.exp(-((s - a) ** 2 / h + (1 / s - 1 / a) ** 2 / h)) + c / (1 + Math.exp(-p * (1 / s - 1 / a)));
         }
 
-        function generate3DData(k, a, c) {
+        function generateData(k, a, c) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
-                y.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
             }
-
             for (let i = 0; i < steps; i++) {
                 let row = [];
                 for (let j = 0; j < steps; j++) {
                     let xv = x[i];
                     let yv = y[j];
-
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                    let peak = k * Math.exp(-((xv - a) ** 2 / 2 + (yv - 1/a) ** 2 / 2));
-                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+                    let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1 / a)));
                     let zv = Math.min(valley + peak + reactantEnergy, zMax);
-
                     row.push(zv);
                 }
                 z.push(row);
@@ -140,12 +109,26 @@
             return { x, y, z };
         }
 
+        function generateParametricData() {
+            let s = computeReactionCoordinate();
+            let V = [], X = [];
+            
+            for (let i = 0; i < steps; i++) {
+                let si = s[i];
+                V.push(VofS(si));
+                X.push(XofS(si));
+            }
+            
+            return { V, X };
+        }
+
         function updatePlot() {
             let k = 0.75;
             let a = transformSliderValue(0);
             let c = 0.0;
 
-            let data = generate3DData(k, a, c);
+            let data = generateData(k, a, c);
+            let parametricData = generateParametricData();
 
             let surfacePlot = {
                 type: 'surface',
@@ -161,36 +144,27 @@
                 x: data.x,
                 y: data.y,
                 z: data.z,
-                contours: { 
-                    coloring: showHeatmap ? 'heatmap' : 'lines',
-                    showlines: true, 
-                    start: 1,  
-                    end: 4, 
+                contours: {
+                    coloring: 'heatmap',
+                    showlines: true,
+                    start: 1,
+                    end: 4,
                     size: (4 - 1) / 20
                 },
                 line: {
-                    width: showHeatmap ? 1 : 3,
+                    width: 1,
                     color: 'black'
                 },
                 colorscale: 'Viridis'
             };
 
-            let VvsSData = generateVvsSData();
-            let VvsSPlot = {
+            let parametricPlot = {
                 type: 'scatter',
-                x: VvsSData.s,
-                y: VvsSData.V,
-                mode: 'lines',
-                line: { color: 'red' }
-            };
-
-            let XvsSData = generateXvsSData(k, a, c);
-            let XvsSPlot = {
-                type: 'scatter',
-                x: XvsSData.s,
-                y: XvsSData.x,
-                mode: 'lines',
-                line: { color: 'green' }
+                x: parametricData.X,
+                y: parametricData.V,
+                mode: 'lines+markers',
+                line: { color: 'purple' },
+                name: 'V vs rxn coordinate'
             };
 
             let layout3D = {
@@ -204,22 +178,15 @@
                 margin: { l: 50, r: 50, b: 50, t: 50 }
             };
 
-            let layoutVvsS = {
-                title: "V vs. s",
-                xaxis: { title: "s" },
-                yaxis: { title: "V" }
-            };
-
-            let layoutXvsS = {
-                title: "X vs. s",
-                xaxis: { title: "s" },
-                yaxis: { title: "X" }
+            let layoutParametric = {
+                title: "V vs rxn coordinate",
+                xaxis: { title: "rxn coordinate (X)" },
+                yaxis: { title: "V (Potential Energy)" }
             };
 
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
-            Plotly.newPlot('plot-V-vs-s', [VvsSPlot], layoutVvsS);
-            Plotly.newPlot('plot-X-vs-s', [XvsSPlot], layoutXvsS);
+            Plotly.newPlot('plot-parametric', [parametricPlot], layoutParametric);
         }
 
         updatePlot();

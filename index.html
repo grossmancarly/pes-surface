@@ -222,8 +222,20 @@
         };
 
         Plotly.react("reaction-plot", [reactionPlot]);
+
+        // Update layout to show axes for the reaction pathway plot
+        Plotly.relayout("reaction-plot", {
+            xaxis: { title: 'Potential (V)' },
+            yaxis: { title: 'Reaction Coordinate' }
+        });
     } else {
         Plotly.react("reaction-plot", []); // Remove reaction pathway plot if hidden
+
+        // Update layout to hide axes for the reaction pathway plot
+        Plotly.relayout("reaction-plot", {
+            xaxis: { visible: false },
+            yaxis: { visible: false }
+        });
     }
 
     // Reaction pathway line (y = 1/x) on contour plot
@@ -238,9 +250,11 @@
         }
     } : {};
 
+    // Plot 3D surface plot and contour plot (with or without reaction pathway line)
     Plotly.react("plot-3D", [surfacePlot]);
     Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
 }
+
 
         function toggleReactionPathway() {
             showReactionPathway = !showReactionPathway;

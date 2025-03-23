@@ -213,9 +213,9 @@
                 margin: { l: 50, r: 50, b: 50, t: 50 }
             };
 
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
-            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
+            Plotly.react('plot-3D', [surfacePlot], layout3D);
+            Plotly.react('plot-contour', [contourPlot], layoutContour);
+            Plotly.react('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
         }
 
         function toggleContourColoring() {

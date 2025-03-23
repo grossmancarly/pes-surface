@@ -17,7 +17,6 @@
         }
         .plot-container {
             width: 90%;
-            margin: 20px 0;
         }
         .slider-container, .button-container {
             display: flex;
@@ -81,18 +80,158 @@
         <div id="plot-contour"></div>
     </div>
 
-    <!-- New Reaction Coordinate Plots -->
+    <!-- New Reaction Coordinate Plot -->
     <div class="plot-container">
         <div id="plot-reaction-coordinate"></div>
-    </div>
-    <div class="plot-container">
-        <div id="plot-x-vs-s"></div>
-    </div>
-    <div class="plot-container">
-        <div id="plot-v-vs-s"></div>
     </div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
-  
+        let showHeatmap = true;
+        
+
+        function transformSliderValue(x) {
+            return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
+        }
+
+        let p = 5;
+        function generateData(k, a, c) {
+            let x = [], y = [], z = [];
+            for (let i = 0; i < steps; i++) {
+                x.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
+            }
+            for (let i = 0; i < steps; i++) {
+                let row = [];
+                for (let j = 0; j < steps; j++) {
+                    let xv = x[i];
+                    let yv = y[j];
+                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                    let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
+                
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+
+                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                    row.push(zv);
+                }
+                z.push(row);
+            }
+            return { x, y, z };
+        }
+
+        // Reaction Coordinate Functions
+        function computeReactionCoordinate(x) {
+            let s = [0];
+            let dx = (xMax - xMin) / (steps - 1);
+            for (let i = 1; i < steps; i++) {
+                let xi = xMin + i * dx;
+                let f_xi = Math.sqrt(xi ** 4 + 1) / (xi ** 2);
+                s.push(s[i - 1] + f_xi * dx);
+            }
+            return s;
+        }
+
+        function generateReactionCoordinateData(k) {
+            let x = [], V = [], s = computeReactionCoordinate(xMax);
+            for (let i = 0; i < steps; i++) {
+                let xv = xMin + (xMax - xMin) * i / (steps - 1);
+                let yv = 1 / xv;
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-(((xv - 1) ** 2) / 2 + ((yv - 1) ** 2) / 2));
+                let zv = Math.min(valley + peak, zMax);
+                x.push(s[i]);
+                V.push(zv);
+            }
+            return { x, V };
+        }
+
+        function updatePlot() {
+            let k = parseFloat(document.getElementById("EaSlider").value);
+            let sliderValue = parseFloat(document.getElementById("aSlider").value);
+            let c = parseFloat(document.getElementById("cSlider").value); // Get the value of c (Reactant Energy)
+            let a = transformSliderValue(sliderValue);
+            let data = generateData(k, a, c);
+            
+            let surfacePlot = {
+                type: 'surface',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis',
+                showscale: false
+            };
+            
+            let contourPlot = {
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                contours: { 
+                    coloring: showHeatmap ? 'heatmap' : 'lines',
+                    showlines: true, 
+                    start: 1,  
+                    end: 4, 
+                    size: (4 - 1) / (20)
+                },
+                line: {
+                    width: showHeatmap ? 1 : 3,  // Thinner lines for heatmap, thicker for contour lines
+                    color: 'black'
+                },
+                colorscale: 'Viridis'
+            };
+
+            let reactionCoordinateData = generateReactionCoordinateData(k);
+
+            let reactionCoordinatePlot = {
+                type: 'scatter',
+                x: reactionCoordinateData.x,
+                y: reactionCoordinateData.V,
+                mode: 'lines',
+                line: { color: 'blue' }
+            };
+
+            let layout3D = {
+                showlegend: false,
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
+            };
+
+            let layoutContour = {
+                showlegend: false,
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                xaxis: { title: 'rBC' },
+                yaxis: { title: 'rAB', scaleanchor: 'x', scaleratio: 1 }
+            };
+
+            let layoutReactionCoordinate = {
+                title: "Reaction Coordinate vs. V",
+                xaxis: { 
+                    title: "Reaction Coordinate (s)",
+                    range: [-500, 500]  // Focus on the region with significant energy changes
+                },
+                yaxis: { 
+                    title: "V (Potential Energy)",
+                    range: [0, zMax]  // Adjust the range of the y-axis if needed
+                },
+                height: 400,
+                margin: { l: 50, r: 50, b: 50, t: 50 }
+            };
+
+
+            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
+        }
+
+        function toggleContourColoring() {
+            showHeatmap = !showHeatmap;
+            updatePlot();
+        }
+        
+        updatePlot();
+    </script>
+</body>
+</html>

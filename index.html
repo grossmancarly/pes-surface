@@ -68,8 +68,8 @@
         }
         #toggleHeatmapContainer {
             position: absolute;
-            top: 550px;
-            left: 20px;
+            top: 520px; /* Positioned above the contour map */
+            right: 20px;
             z-index: 10;
         }
     </style>
@@ -256,22 +256,14 @@
                     range: [0, 5]  
                 },
                 yaxis: { 
-                    title: 'rAB',
-                    scaleanchor: 'x', 
-                    scaleratio: 1,
-                    range: [0, 5]  
+                    title: 'rAB', 
+                    range: [0, 5] 
                 }
             };
 
-            // Include reaction pathway line (y = 1/x) if enabled
-            let contourData = [contourPlot];
-            if (showReactionPathway) {
-                contourData.push(reactionPathwayLine);
-            }
-
             // Update the surface plot and contour plot
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', contourData, layoutContour);
+            Plotly.newPlot('plot-contour', [contourPlot, reactionPathwayLine], layoutContour);
         }
 
         // Reaction pathway toggle

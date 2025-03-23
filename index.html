@@ -14,21 +14,30 @@
             text-align: center;
             background: white;
             color: black;
+            padding-left: 200px; /* Space for the left-side flexbox */
         }
         .plot-container {
-            width: 90%;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            width: 90%;
             margin-bottom: 20px;
         }
-        .slider-container, .button-container {
+        .plot {
+            width: 48%; /* Make the plots take up almost half the width each */
+            height: 500px;
+        }
+        .slider-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            width: 60%;
-            margin: 20px 0;
+            align-items: flex-start; /* Align sliders to the left */
+            position: fixed; /* Fixed position on the left */
+            top: 20px;
+            left: 20px; /* Position from the left edge */
+            width: 200px; /* Fixed width for the slider container */
             padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8); /* Slight transparent background */
             border-radius: 10px;
+            z-index: 10; /* Ensure it appears on top */
         }
         .slider {
             width: 100%;
@@ -49,11 +58,25 @@
         .toggle-button:hover {
             background-color: #0056b3;
         }
-        .grid-container {
+        .button-container {
+            margin-top: 20px;
+        }
+        #reaction-plot {
+            width: 90%;
+            height: 500px;
+            margin-top: 20px;
+        }
+        #right-side-container {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            width: 80%;
+            grid-template-rows: auto 1fr;
+            grid-gap: 10px;
+            width: 48%; /* Make it take up half the width */
+        }
+        #toggleHeatmapContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
     </style>
 </head>
@@ -61,8 +84,15 @@
     <h2>AB + C → ABC‡ → A + BC</h2>
 
     <div class="plot-container">
-        <div id="plot-3D"></div>
-        <div id="plot-contour"></div>
+        <div id="plot-3D" class="plot"></div>
+        
+        <!-- Right side grid container -->
+        <div id="right-side-container">
+            <div id="toggleHeatmapContainer">
+                <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
+            </div>
+            <div id="plot-contour" class="plot"></div>
+        </div>
     </div>
 
     <div class="slider-container">
@@ -80,22 +110,17 @@
         <label for="cSlider">Reactant Energy:</label>
         <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
         <span id="cValue"></span>
-    </div>
 
-    <div class="button-container">
-        <button id="toggleContour" class="toggle-button" onclick="toggleContourColoring()">Toggle Contour Heatmap</button>
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
-    <div class="grid-container" id="reaction-pathway-container" style="display: none;">
-        <div id="reaction-plot"></div>
-    </div>
+    <div id="reaction-plot"></div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
         let showHeatmap = true;
-        let showReactionPathway = false;
+        let showReactionPathway = false; // Flag to track if reaction pathway is visible
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -126,11 +151,13 @@
             return { x, y, z };
         }
 
+        // Reaction Coordinate function definition
         function reactionCoordinate(s, k, a, c) {
             const h = 0.1;
             return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1/s - 1/a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1/s - 1/a))), -1));
         }
 
+        // Calculate Potential V(s)
         function potential(s) {
             let integral = 0;
             for (let i = 0.2; i < s; i += 0.01) {
@@ -157,7 +184,7 @@
                 showscale: false
             };
 
-            // Contour plot
+            // Contour plot (always visible)
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
@@ -199,68 +226,34 @@
 
                 // Reaction pathway line
                 reactionPathwayLine = {
-                    x: data.x.filter(x => x >= 0.01 && x <= 5), 
-                    y: data.x.filter(x => x >= 0.01 && x <= 5).map(x => 1/x), 
+                    x: data.x.filter(x => x >= 0.01 && x <= 5), // Adjust the domain from 0.01 to 5
+                    y: data.x.filter(x => x >= 0.01 && x <= 5).map(x => 1/x), // y = 1/x
                     mode: 'lines',
-                    type: 'scatter',
-                    line: { color: 'red', dash: 'dash' },
-                    name: 'y = 1/x'
+                    name: 'y = 1/x',
+                    line: {
+                        color: 'red',
+                        dash: 'dash'
+                    }
                 };
 
-                // Layout for reaction plot (V vs X)
-                let layoutReaction = {
-                    showlegend: false,
-                    height: 500,
-                    margin: { l: 50, r: 50, b: 50, t: 50 },
-                    xaxis: { title: 'Reaction Coordinate' },
-                    yaxis: { title: 'Potential (V)', range: [0.5, 3] }
-                };
-
-                Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
+                Plotly.react("reaction-plot", [reactionPlot, reactionPathwayLine]);
             }
 
-            // Layout for surface plot
-            let layout3D = {
-                showlegend: false,
-                height: 500,
-                margin: { l: 50, r: 50, b: 50, t: 50 },
-                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
-            };
-
-            // Layout for contour plot
-            let layoutContour = {
-                showlegend: false,
-                height: 500,
-                margin: { l: 50, r: 50, b: 50, t: 50 },
-                xaxis: { 
-                    title: 'rBC',
-                    range: [0, 5]  
-                },
-                yaxis: { 
-                    title: 'rAB',
-                    scaleanchor: 'x', 
-                    scaleratio: 1,
-                    range: [0, 5]  
-                }
-            };
-
-            // Include reaction pathway line (y = 1/x) if enabled
-            let contourData = [contourPlot];
-            if (showReactionPathway) {
-                contourData.push(reactionPathwayLine); // Add the line to the contour plot
-            }
-
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', contourData, layoutContour);
+            Plotly.react("plot-3D", [surfacePlot]);
+            Plotly.react("plot-contour", [contourPlot]);
         }
 
         function toggleReactionPathway() {
             showReactionPathway = !showReactionPathway;
-            const reactionPathwayContainer = document.getElementById("reaction-pathway-container");
-            reactionPathwayContainer.style.display = showReactionPathway ? "grid" : "none";
             updatePlot();
         }
 
+        function toggleHeatmap() {
+            showHeatmap = !showHeatmap;
+            updatePlot();
+        }
+
+        // Initialize plots
         updatePlot();
     </script>
 </body>

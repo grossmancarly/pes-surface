@@ -66,6 +66,12 @@
             height: 500px;
             margin-top: 20px;
         }
+        #toggleHeatmapContainer {
+            position: absolute;
+            top: 550px;
+            left: 20px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -93,12 +99,14 @@
         <span id="cValue"></span>
 
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
-        
-        <!-- Toggle Heatmap Button -->
-        <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
     </div>
 
     <div id="reaction-plot"></div>
+
+    <!-- Toggle Heatmap Button positioned above the contour plot -->
+    <div id="toggleHeatmapContainer">
+        <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
+    </div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
@@ -258,20 +266,21 @@
             // Include reaction pathway line (y = 1/x) if enabled
             let contourData = [contourPlot];
             if (showReactionPathway) {
-                contourData.push(reactionPathwayLine); // Add the line to the contour plot
+                contourData.push(reactionPathwayLine);
             }
 
+            // Update the surface plot and contour plot
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
             Plotly.newPlot('plot-contour', contourData, layoutContour);
         }
 
+        // Reaction pathway toggle
         function toggleReactionPathway() {
             showReactionPathway = !showReactionPathway;
-            const reactionPlotElement = document.getElementById("reaction-plot");
-            reactionPlotElement.style.display = showReactionPathway ? 'block' : 'none';
             updatePlot();
         }
 
+        // Heatmap toggle
         function toggleHeatmap() {
             showHeatmap = !showHeatmap;
             updatePlot();

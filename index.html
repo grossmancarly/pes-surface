@@ -86,7 +86,7 @@
     </div>
 
     <script>
-        let xMin = 0, xMax = 5, yMin = 0, yMax = 5, steps = 100;
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
         let showHeatmap = true;
 
@@ -131,13 +131,13 @@
             return s;
         }
 
-        function generateReactionCoordinateData(k) {
+        function generateReactionCoordinateData(k, a, c) {
             let x = [], V = [], s = computeReactionCoordinate(xMax);
             for (let i = 0; i < steps; i++) {
                 let xv = xMin + (xMax - xMin) * i / (steps - 1);
                 let yv = 1 / xv;
                 let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - 1) ** 2) / 2 + ((yv - 1) ** 2) / 2));
+                let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1) ** 2) / 2));
                 let zv = Math.min(valley + peak, zMax);
                 x.push(s[i]);
                 V.push(zv);
@@ -150,8 +150,8 @@
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let c = parseFloat(document.getElementById("cSlider").value); // Get the value of c (Reactant Energy)
             let a = transformSliderValue(sliderValue);
+
             let data = generateData(k, a, c);
-            
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
@@ -160,7 +160,7 @@
                 colorscale: 'Viridis',
                 showscale: false
             };
-            
+
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
@@ -180,7 +180,7 @@
                 colorscale: 'Viridis'
             };
 
-            let reactionCoordinateData = generateReactionCoordinateData(k);
+            let reactionCoordinateData = generateReactionCoordinateData(k, a, c);
 
             let reactionCoordinatePlot = {
                 type: 'scatter',
@@ -213,9 +213,9 @@
                 margin: { l: 50, r: 50, b: 50, t: 50 }
             };
 
-            Plotly.react('plot-3D', [surfacePlot], layout3D);
-            Plotly.react('plot-contour', [contourPlot], layoutContour);
-            Plotly.react('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
+            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
         }
 
         function toggleContourColoring() {
@@ -227,4 +227,3 @@
     </script>
 </body>
 </html>
-

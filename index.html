@@ -226,6 +226,9 @@
                 };
 
                 Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
+                document.getElementById("reaction-plot").style.display = "block";
+            } else {
+                document.getElementById("reaction-plot").style.display = "none";
             }
 
             // Layout for surface plot

@@ -187,6 +187,13 @@
                     title: 'V',
                     tickvals: [0, zMax],
                     ticktext: ['0', zMax]
+                },
+                layout: {
+                    scene: {
+                        xaxis: { title: 'rAB' },
+                        yaxis: { title: 'rBC' },
+                        zaxis: { title: 'V' }
+                    }
                 }
             };
 
@@ -207,7 +214,11 @@
                     width: showHeatmap ? 1 : 3, 
                     color: 'black'
                 },
-                colorscale: 'Viridis'
+                colorscale: 'Viridis',
+                layout: {
+                    xaxis: { title: 'rAB' },
+                    yaxis: { title: 'rBC' }
+                }
             };
 
             // Reaction Pathway Plot
@@ -255,16 +266,17 @@
                 x: data.x.filter(x => x >= 0.01 && 1/x <= 5), // Adjust domain for 1/x <= 5
                 y: data.x.filter(x => x >= 0.01 && 1/x <= 5).map(x => 1/x), // y = 1/x, only where y <= 5
                 mode: 'lines',
-                name: 'y = 1/x',
-                line: {
-                    color: 'red',
-                    dash: 'dash',
-                }
-            } : {};
+                line: { color: 'red', width: 2 },
+                name: 'Reaction Pathway'
+            } : null;
 
-            // Plot 3D surface plot and contour plot (with or without reaction pathway line)
-            Plotly.react("plot-3D", [surfacePlot]);
-            Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
+            Plotly.react("plot-3D", [surfacePlot, reactionPathwayLine].filter(Boolean));
+            Plotly.react("plot-contour", [contourPlot]);
+        }
+
+        function toggleHeatmap() {
+            showHeatmap = !showHeatmap;
+            updatePlot(); 
         }
 
         function toggleReactionPathway() {
@@ -272,13 +284,8 @@
             updatePlot();
         }
 
-        function toggleHeatmap() {
-            showHeatmap = !showHeatmap;
-            updatePlot();
-        }
+        updatePlot(); // Initial plot generation
 
-        // Initialize plots
-        updatePlot();
     </script>
 </body>
 </html>

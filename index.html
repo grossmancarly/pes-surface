@@ -89,7 +89,8 @@
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
         let showHeatmap = true;
-        
+        let showReactionPathwayLine = false;  // To control visibility of the reaction pathway line
+
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
@@ -188,6 +189,23 @@
                 line: { color: '#007BFF' }
             };
 
+            // If the reaction pathway line is visible, draw it
+            let reactionPathwayLine = [];
+            if (showReactionPathwayLine) {
+                for (let i = 0; i < steps; i++) {
+                    let xv = data.x[i];
+                    reactionPathwayLine.push({ x: xv, y: 1 / xv, color: 'red' });
+                }
+            }
+
+            let reactionPathwayData = reactionPathwayLine.length ? {
+                x: reactionPathwayLine.map(point => point.x),
+                y: reactionPathwayLine.map(point => point.y),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: 'red', width: 4 }
+            } : {};
+
             // Layout for surface plot
             let layout3D = {
                 showlegend: false,
@@ -215,8 +233,8 @@
             };
 
             // Plot the graphs
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+            Plotly.newPlot('plot-3D', [surfacePlot, reactionPathwayData], layout3D);
+            Plotly.newPlot('plot-contour', [contourPlot, reactionPathwayData], layoutContour);
             Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
         }
 
@@ -226,9 +244,8 @@
         }
 
         function toggleReactionPathway() {
-            const reactionPlotElement = document.getElementById("reaction-plot");
-            const isVisible = reactionPlotElement.style.display === "block";
-            reactionPlotElement.style.display = isVisible ? "none" : "block";
+            showReactionPathwayLine = !showReactionPathwayLine;
+            updatePlot();
         }
 
         updatePlot();

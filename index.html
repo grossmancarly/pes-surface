@@ -17,10 +17,14 @@
             padding-left: 200px; /* Space for the left-side flexbox */
         }
         .plot-container {
-            width: 90%;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            width: 90%;
             margin-bottom: 20px;
+        }
+        .plot {
+            width: 48%; /* Make the plots take up almost half the width each */
+            height: 500px;
         }
         .slider-container {
             display: flex;
@@ -54,14 +58,22 @@
         .toggle-button:hover {
             background-color: #0056b3;
         }
+        .button-container {
+            margin-top: 20px;
+        }
+        #reaction-plot {
+            width: 90%;
+            height: 500px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
     <div class="plot-container">
-        <div id="plot-3D"></div>
-        <div id="reaction-plot" style="display: none;"></div>
+        <div id="plot-3D" class="plot"></div>
+        <div id="plot-contour" class="plot"></div>
     </div>
 
     <div class="slider-container">
@@ -86,9 +98,7 @@
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
-    <div class="plot-container">
-        <div id="plot-contour"></div>
-    </div>
+    <div id="reaction-plot"></div>
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
@@ -100,7 +110,7 @@
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
-        let p = 1.5;
+        let p = 5;
         function generateData(k, a, c) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
@@ -268,6 +278,7 @@
             updatePlot();
         }
 
+        // Initial plot
         updatePlot();
     </script>
 </body>

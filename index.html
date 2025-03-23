@@ -56,6 +56,7 @@
 
     <div class="plot-container">
         <div id="plot-3D"></div>
+        <div id="reaction-plot" style="display: none;"></div>
     </div>
 
     <div class="slider-container">
@@ -82,37 +83,36 @@
 
     <div class="plot-container">
         <div id="plot-contour"></div>
-        <div id="reaction-plot" style="display: none;"></div>
     </div>
 
     <script>
-        let xMin = 0.2, xMax = 5, steps = 100;
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+        let zMax = 5;
         let showHeatmap = true;
-        let showReactionPathway = false;
+        let showReactionPathway = false; // Flag to track if reaction pathway is visible
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
         let p = 5;
-
         function generateData(k, a, c) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
-                y.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
             }
-
             for (let i = 0; i < steps; i++) {
                 let row = [];
                 for (let j = 0; j < steps; j++) {
                     let xv = x[i];
                     let yv = y[j];
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                    let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
-                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1 / a)));
+                    let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
 
-                    let zv = valley + peak + reactantEnergy;
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+
+                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
                     row.push(zv);
                 }
                 z.push(row);
@@ -120,72 +120,136 @@
             return { x, y, z };
         }
 
-        function updatePlot() {
-            let k = parseFloat(document.getElementById("EaSlider").value);
-            let sliderValue = parseFloat(document.getElementById("aSlider").value);
-            let c = parseFloat(document.getElementById("cSlider").value);
-            let a = transformSliderValue(sliderValue);
-            let data = generateData(k, a, c);
-
-            let surfacePlot = {
-                type: 'surface',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                colorscale: 'Viridis',
-                showscale: false
-            };
-
-            let contourPlot = {
-                type: 'contour',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                contours: {
-                    coloring: showHeatmap ? 'heatmap' : 'lines',
-                    showlines: true
-                }
-            };
-
-            let reactionPathwayLine = {
-                x: Array.from({ length: steps }, (_, i) => 0.2 + i * (xMax - 0.2) / steps),
-                y: Array.from({ length: steps }, (_, i) => 1 / (0.2 + i * (xMax - 0.2) / steps)),
-                mode: 'lines',
-                type: 'scatter',
-                line: { color: 'red', dash: 'dash' },
-                name: 'y = 1/x'
-            };
-
-            let layout3D = {
-                height: 500,
-                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
-            };
-
-            let layoutContour = {
-                height: 500,
-                xaxis: { title: 'rBC' },
-                yaxis: { title: 'rAB' }
-            };
-
-            let layoutReaction = {
-                height: 500,
-                xaxis: { title: 'Reaction Coordinate' },
-                yaxis: { title: 'Potential (V)' }
-            };
-
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            
-            let contourData = [contourPlot];
-            if (showReactionPathway) {
-                contourData.push(reactionPathwayLine);
-            }
-            
-            Plotly.newPlot('plot-contour', contourData, layoutContour);
-
-            if (showReactionPathway) {
-                Plotly.newPlot('reaction-plot', [reactionPathwayLine], layoutReaction);
-            }
+        // Reaction Coordinate function definition
+        function reactionCoordinate(s, k, a, c) {
+            const h = 0.1;
+            return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1/s - 1/a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1/s - 1/a))), -1));
         }
+
+        // Calculate Potential V(s)
+        function potential(s) {
+            let integral = 0;
+            for (let i = 0.2; i < s; i += 0.01) {
+                let x = i;
+                integral += Math.sqrt(Math.pow(x, 4) + 1) / Math.pow(x, 2) * 0.01;
+            }
+            return integral;
+        }
+
+        function updatePlot() {
+    let k = parseFloat(document.getElementById("EaSlider").value);
+    let sliderValue = parseFloat(document.getElementById("aSlider").value);
+    let c = parseFloat(document.getElementById("cSlider").value);
+    let a = transformSliderValue(sliderValue);
+    let data = generateData(k, a, c);
+
+    // Surface plot
+    let surfacePlot = {
+        type: 'surface',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false
+    };
+
+    // Contour plot
+    let contourPlot = {
+        type: 'contour',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        contours: { 
+            coloring: showHeatmap ? 'heatmap' : 'lines',
+            showlines: true, 
+            start: 1,  
+            end: 4, 
+            size: (4 - 1) / (20)
+        },
+        line: {
+            width: showHeatmap ? 1 : 3, 
+            color: 'black'
+        },
+        colorscale: 'Viridis'
+    };
+
+    // Reaction Coordinate function
+    let reactionCoordinates = [];
+    let potentials = [];
+    let reactionPathwayLine = null;
+
+    if (showReactionPathway) {
+        // Reaction Pathway Plot
+        for (let s = 0.2; s <= 5; s += 0.01) {
+            reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+            potentials.push(potential(s));
+        }
+
+        let reactionPlot = {
+            x: potentials,
+            y: reactionCoordinates,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#007BFF' }
+        };
+
+        // Reaction pathway line
+        reactionPathwayLine = {
+            x: data.x.filter(x => x >= 0.01 && x <= 5), // Adjust the domain from 0.01 to 5
+            y: data.x.filter(x => x >= 0.01 && x <= 5).map(x => 1/x), // y = 1/x
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: 'red', dash: 'dash' },
+            name: 'y = 1/x'
+        };
+
+        // Layout for reaction plot (V vs X)
+        let layoutReaction = {
+            showlegend: false,
+            height: 500,
+            margin: { l: 50, r: 50, b: 50, t: 50 },
+            xaxis: { title: 'Reaction Coordinate' },
+            yaxis: { title: 'Potential (V)', range: [0.5,2.5] }
+        };
+
+        Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
+    }
+
+    // Layout for surface plot
+    let layout3D = {
+        showlegend: false,
+        height: 500,
+        margin: { l: 50, r: 50, b: 50, t: 50 },
+        scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
+    };
+
+    // Layout for contour plot
+    let layoutContour = {
+        showlegend: false,
+        height: 500,
+        margin: { l: 50, r: 50, b: 50, t: 50 },
+        xaxis: { 
+            title: 'rBC',
+            range: [0, 5]  
+        },
+        yaxis: { 
+            title: 'rAB',
+            scaleanchor: 'x', 
+            scaleratio: 1,
+            range: [0, 5]  
+        }
+    };
+
+    // Include reaction pathway line (y = 1/x) if enabled
+    let contourData = [contourPlot];
+    if (showReactionPathway) {
+        contourData.push(reactionPathwayLine); // Add the line to the contour plot
+    }
+
+    Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+    Plotly.newPlot('plot-contour', contourData, layoutContour);
+}
+
 
         function toggleContourColoring() {
             showHeatmap = !showHeatmap;
@@ -194,7 +258,8 @@
 
         function toggleReactionPathway() {
             showReactionPathway = !showReactionPathway;
-            document.getElementById("reaction-plot").style.display = showReactionPathway ? "block" : "none";
+            const reactionPlotElement = document.getElementById("reaction-plot");
+            reactionPlotElement.style.display = showReactionPathway ? "block" : "none";
             updatePlot();
         }
 

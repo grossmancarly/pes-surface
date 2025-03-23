@@ -86,17 +86,15 @@
     </div>
 
     <script>
-        let steps = 100;
+        let xMin = 0, xMax = 5, yMin = 0, yMax = 5, steps = 100;
         let zMax = 5;
         let showHeatmap = true;
-
-        // Adjust the domain
-        let xMin = 0.1, xMax = 5, yMin = 0.1, yMax = 5;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
+        let p = 5;
         function generateData(k, a, c) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
@@ -111,7 +109,7 @@
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
                     let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
                 
-                    let reactantEnergy = c / (1 + Math.exp(-10 * (yv - 1/a)));  // Adjusted p value for clarity
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
 
                     let zv = Math.min(valley + peak + reactantEnergy, zMax);
                     row.push(zv);
@@ -121,13 +119,39 @@
             return { x, y, z };
         }
 
+        // Reaction Coordinate Functions
+        function computeReactionCoordinate(x) {
+            let s = [0];
+            let dx = (xMax - xMin) / (steps - 1);
+            for (let i = 1; i < steps; i++) {
+                let xi = xMin + i * dx;
+                let f_xi = Math.sqrt(xi ** 4 + 1) / (xi ** 2);
+                s.push(s[i - 1] + f_xi * dx);
+            }
+            return s;
+        }
+
+        function generateReactionCoordinateData(k) {
+            let x = [], V = [], s = computeReactionCoordinate(xMax);
+            for (let i = 0; i < steps; i++) {
+                let xv = xMin + (xMax - xMin) * i / (steps - 1);
+                let yv = 1 / xv;
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-(((xv - 1) ** 2) / 2 + ((yv - 1) ** 2) / 2));
+                let zv = Math.min(valley + peak, zMax);
+                x.push(s[i]);
+                V.push(zv);
+            }
+            return { x, V };
+        }
+
         function updatePlot() {
             let k = parseFloat(document.getElementById("EaSlider").value);
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let c = parseFloat(document.getElementById("cSlider").value); // Get the value of c (Reactant Energy)
             let a = transformSliderValue(sliderValue);
-
             let data = generateData(k, a, c);
+            
             let surfacePlot = {
                 type: 'surface',
                 x: data.x,
@@ -136,7 +160,7 @@
                 colorscale: 'Viridis',
                 showscale: false
             };
-
+            
             let contourPlot = {
                 type: 'contour',
                 x: data.x,
@@ -156,7 +180,7 @@
                 colorscale: 'Viridis'
             };
 
-            let reactionCoordinateData = generateReactionCoordinateData(k, a, c);
+            let reactionCoordinateData = generateReactionCoordinateData(k);
 
             let reactionCoordinatePlot = {
                 type: 'scatter',
@@ -189,9 +213,9 @@
                 margin: { l: 50, r: 50, b: 50, t: 50 }
             };
 
-            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
-            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
+            Plotly.react('plot-3D', [surfacePlot], layout3D);
+            Plotly.react('plot-contour', [contourPlot], layoutContour);
+            Plotly.react('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
         }
 
         function toggleContourColoring() {

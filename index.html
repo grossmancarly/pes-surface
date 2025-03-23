@@ -86,141 +86,156 @@
     </div>
 
     <script>
-    let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
-    let zMax = 5;
-    let showHeatmap = true;
-    let showReactionLine = false;  // Track whether the reaction line should be visible
-    
-    function transformSliderValue(x) {
-        return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
-    }
-    
-    let p = 5;
-    function generateData(k, a, c) {
-        let x = [], y = [], z = [];
-        for (let i = 0; i < steps; i++) {
-            x.push(xMin + (xMax - xMin) * i / (steps - 1));
-            y.push(yMin + (yMax - yMin) * i / (steps - 1));
-        }
-        for (let i = 0; i < steps; i++) {
-            let row = [];
-            for (let j = 0; j < steps; j++) {
-                let xv = x[i];
-                let yv = y[j];
-                let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
-            
-                let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
-
-                let zv = Math.min(valley + peak + reactantEnergy, zMax);
-                row.push(zv);
-            }
-            z.push(row);
-        }
-        return { x, y, z };
-    }
-
-    function updatePlot() {
-        let k = parseFloat(document.getElementById("EaSlider").value);
-        let sliderValue = parseFloat(document.getElementById("aSlider").value);
-        let c = parseFloat(document.getElementById("cSlider").value); // Get the value of c (Reactant Energy)
-        let a = transformSliderValue(sliderValue);
-        let data = generateData(k, a, c);
-
-        // Surface plot
-        let surfacePlot = {
-            type: 'surface',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false
-        };
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+        let zMax = 5;
+        let showHeatmap = true;
         
-        // Contour plot
-        let contourPlot = {
-            type: 'contour',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            contours: { 
-                coloring: showHeatmap ? 'heatmap' : 'lines',
-                showlines: true, 
-                start: 1,  
-                end: 4, 
-                size: (4 - 1) / (20)
-            },
-            line: {
-                width: showHeatmap ? 1 : 3,  // Thinner lines for heatmap, thicker for contour lines
-                color: 'black'
-            },
-            colorscale: 'Viridis'
-        };
+        function transformSliderValue(x) {
+            return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
+        }
+        
+        let p = 5;
+        function generateData(k, a, c) {
+            let x = [], y = [], z = [];
+            for (let i = 0; i < steps; i++) {
+                x.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
+            }
+            for (let i = 0; i < steps; i++) {
+                let row = [];
+                for (let j = 0; j < steps; j++) {
+                    let xv = x[i];
+                    let yv = y[j];
+                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                    let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
+                
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
 
-        // Plot V vs X
-        let reactionCoordinates = [];
-        let potentials = [];
-        for (let s = 0.2; s <= 5; s += 0.01) {
-            reactionCoordinates.push(reactionCoordinate(s, k, a, c));
-            potentials.push(potential(s));
+                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                    row.push(zv);
+                }
+                z.push(row);
+            }
+            return { x, y, z };
         }
 
-        let reactionPlot = {
-            x: potentials,
-            y: reactionCoordinates,
-            mode: 'lines',
-            type: 'scatter',
-            line: { color: '#007BFF' }
-        };
+        // Calculate Reaction Coordinate X(s)
+        function reactionCoordinate(s, k, a, c) {
+            const h = 0.1;  // Adjust the value of h as needed
+            return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1/s - 1/a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1/s - 1/a))), -1));
+        }
 
-        // Reaction coordinate line y = 1/x
-        let reactionLineData = {
-            x: data.x,
-            y: data.x.map(x => 1 / x),
-            mode: 'lines',
-            type: 'scatter',
-            line: { color: 'red', width: 2 }
-        };
-
-        // Layout for surface plot
-        let layout3D = {
-            showlegend: false,
-            height: 500,
-            margin: { l: 50, r: 50, b: 50, t: 50 },
-            scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
-        };
-
-        // Layout for contour plot
-        let layoutContour = {
-            showlegend: false,
-            height: 500,
-            margin: { l: 50, r: 50, b: 50, t: 50 },
-            xaxis: { 
-                title: 'rBC',
-                range: [0, 5]  // Limit x-axis range from 0 to 5
-            },
-            yaxis: { 
-                title: 'rAB',
-                scaleanchor: 'x', 
-                scaleratio: 1,
-                range: [0, 5]  // Limit y-axis range from 0 to 5
+        // Calculate Potential V(s)
+        function potential(s) {
+            let integral = 0;
+            for (let i = 0.2; i < s; i += 0.01) {
+                let x = i;
+                integral += Math.sqrt(Math.pow(x, 4) + 1) / Math.pow(x, 2) * 0.01;  // Using numerical integration
             }
-        };
+            return integral;
+        }
 
-        // Layout for reaction plot (V vs X)
-        let layoutReaction = {
-            showlegend: false,
-            height: 500,
-            margin: { l: 50, r: 50, b: 50, t: 50 },
-            xaxis: { title: 'Reaction Coordinate' },
-            yaxis: { title: 'Potential (V)' }
-        };
+        function updatePlot() {
+            let k = parseFloat(document.getElementById("EaSlider").value);
+            let sliderValue = parseFloat(document.getElementById("aSlider").value);
+            let c = parseFloat(document.getElementById("cSlider").value); // Get the value of c (Reactant Energy)
+            let a = transformSliderValue(sliderValue);
+            let data = generateData(k, a, c);
 
-        // Plot the graphs
-        Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-        Plotly.newPlot('plot-contour', [contourPlot, showReactionLine ? reactionLineData : {}], layoutContour);  // Conditionally add the reaction line
-        Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
+            // Surface plot
+            let surfacePlot = {
+                type: 'surface',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis',
+                showscale: false
+            };
+            
+            // Contour plot
+            let contourPlot = {
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                contours: { 
+                    coloring: showHeatmap ? 'heatmap' : 'lines',
+                    showlines: true, 
+                    start: 1,  
+                    end: 4, 
+                    size: (4 - 1) / (20)
+                },
+                line: {
+                    width: showHeatmap ? 1 : 3,  // Thinner lines for heatmap, thicker for contour lines
+                    color: 'black'
+                },
+                colorscale: 'Viridis'
+            };
+
+            // Plot the line y = 1/x
+            let lineData = {
+                x: data.x,
+                y: data.x.map(x => 1 / x),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: 'red', width: 2 }
+            };
+
+            // Plot V vs X
+            let reactionCoordinates = [];
+            let potentials = [];
+            for (let s = 0.2; s <= 5; s += 0.01) {
+                reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+                potentials.push(potential(s));
+            }
+
+            let reactionPlot = {
+                x: potentials,
+                y: reactionCoordinates,
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#007BFF' }
+            };
+
+            // Layout for surface plot
+            let layout3D = {
+                showlegend: false,
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
+            };
+
+            // Layout for contour plot
+let layoutContour = {
+    showlegend: false,
+    height: 500,
+    margin: { l: 50, r: 50, b: 50, t: 50 },
+    xaxis: { 
+        title: 'rBC',
+        range: [0, 5]  // Limit x-axis range from 0 to 5
+    },
+    yaxis: { 
+        title: 'rAB',
+        scaleanchor: 'x', 
+        scaleratio: 1,
+        range: [0, 5]  // Limit y-axis range from 0 to 5
     }
+};
+
+            // Layout for reaction plot (V vs X)
+            let layoutReaction = {
+                showlegend: false,
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                xaxis: { title: 'Reaction Coordinate' },
+                yaxis: { title: 'Potential (V)' }
+            };
+
+            // Plot the graphs
+            Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
+            Plotly.newPlot('plot-contour', [contourPlot, lineData], layoutContour);  // Add the line to the contour plot
+            Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
+        }
 
         function toggleContourColoring() {
             showHeatmap = !showHeatmap;
@@ -228,15 +243,12 @@
         }
 
         function toggleReactionPathway() {
-            showReactionLine = !showReactionLine;  // Toggle the visibility of the reaction line
             const reactionPlotElement = document.getElementById("reaction-plot");
             const isVisible = reactionPlotElement.style.display === "block";
             reactionPlotElement.style.display = isVisible ? "none" : "block";
-            updatePlot();  // Update the plots when toggling the reaction pathway
         }
 
         updatePlot();
-</script>
-
+    </script>
 </body>
 </html>

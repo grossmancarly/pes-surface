@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
     <title>3D Transition State Surface with Contour</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
@@ -12,11 +12,14 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: white; 
+            background: white;
             color: black;
         }
         .plot-container {
             width: 90%;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
         }
         .slider-container, .button-container {
             display: flex;
@@ -53,6 +56,7 @@
 
     <div class="plot-container">
         <div id="plot-3D"></div>
+        <div id="reaction-plot" style="display: none;"></div>
     </div>
 
     <div class="slider-container">
@@ -74,14 +78,11 @@
 
     <div class="button-container">
         <button id="toggleContour" class="toggle-button" onclick="toggleContourColoring()">Toggle Contour Heatmap</button>
+        <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
     <div class="plot-container">
         <div id="plot-contour"></div>
-    </div>
-
-    <div class="plot-container">
-        <div id="reaction-plot"></div>
     </div>
 
     <script>
@@ -223,7 +224,13 @@
             showHeatmap = !showHeatmap;
             updatePlot();
         }
-        
+
+        function toggleReactionPathway() {
+            const reactionPlotElement = document.getElementById("reaction-plot");
+            const isVisible = reactionPlotElement.style.display === "block";
+            reactionPlotElement.style.display = isVisible ? "none" : "block";
+        }
+
         updatePlot();
     </script>
 </body>

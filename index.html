@@ -173,33 +173,25 @@
                 colorscale: 'Viridis'
             };
 
-            // Plot V vs X for Reaction Coordinate only if enabled
+            // Reaction Coordinate for the 1/x line
             let reactionCoordinates = [];
             let potentials = [];
+            let reactionPathwayPlot = null;
+
             if (showReactionPathway) {
                 for (let s = 0.2; s <= 5; s += 0.01) {
                     reactionCoordinates.push(reactionCoordinate(s, k, a, c));
                     potentials.push(potential(s));
                 }
 
-                let reactionPlot = {
+                // Add the "1/x" line for reaction pathway plot
+                reactionPathwayPlot = {
                     x: potentials,
                     y: reactionCoordinates,
                     mode: 'lines',
                     type: 'scatter',
-                    line: { color: '#007BFF' }
+                    line: { color: '#007BFF', width: 2 }
                 };
-
-                // Layout for reaction plot (V vs X)
-                let layoutReaction = {
-                    showlegend: false,
-                    height: 500,
-                    margin: { l: 50, r: 50, b: 50, t: 50 },
-                    xaxis: { title: 'Reaction Coordinate' },
-                    yaxis: { title: 'Potential (V)' }
-                };
-
-                Plotly.newPlot('reaction-plot', [reactionPlot], layoutReaction);
             }
 
             // Layout for surface plot
@@ -227,8 +219,14 @@
                 }
             };
 
+            // Plot both surface and contour together
+            let contourData = [contourPlot];
+            if (showReactionPathway) {
+                contourData.push(reactionPathwayPlot); // Add the reaction pathway line if it's visible
+            }
+
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+            Plotly.newPlot('plot-contour', contourData, layoutContour);
         }
 
         function toggleContourColoring() {

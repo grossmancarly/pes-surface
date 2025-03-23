@@ -210,9 +210,18 @@
     }
 
     function toggleReactionPathway() {
-        showReactionPathway = !showReactionPathway;
-        updatePlot();
+    showReactionPathway = !showReactionPathway;
+    const reactionPlotElement = document.getElementById("reaction-plot");
+
+    if (showReactionPathway) {
+        reactionPlotElement.style.display = "block";
+    } else {
+        reactionPlotElement.style.display = "none";
     }
+
+    updatePlot(); // Ensure all elements update
+}
+
 
     window.onload = updatePlot;
 </script>

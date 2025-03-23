@@ -223,10 +223,16 @@
 
         Plotly.react("reaction-plot", [reactionPlot]);
 
-        // Update layout to show axes for the reaction pathway plot
+        // Update layout to show axes for the reaction pathway plot with fixed ranges and labels
         Plotly.relayout("reaction-plot", {
-            xaxis: { title: 'Potential (V)' },
-            yaxis: { title: 'Reaction Coordinate' }
+            xaxis: { 
+                title: 'Reaction Coordinate', 
+                range: [0, 5] // Set range for Reaction Coordinate axis
+            },
+            yaxis: { 
+                title: 'Potential (V)', 
+                range: [0, 3] // Set fixed range for V axis
+            }
         });
     } else {
         Plotly.react("reaction-plot", []); // Remove reaction pathway plot if hidden
@@ -254,6 +260,7 @@
     Plotly.react("plot-3D", [surfacePlot]);
     Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
 }
+
 
 
         function toggleReactionPathway() {

@@ -52,17 +52,6 @@
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
-    <div class="slider-container">
-        <label>K (Height of Peak): <span id="k-value">0.75</span></label>
-        <input id="k-slider" type="range" min="0.1" max="2.0" step="0.05" value="0.75" class="slider">
-
-        <label>A (Position of Peak): <span id="a-value">1.0</span></label>
-        <input id="a-slider" type="range" min="0.5" max="2.0" step="0.05" value="1.0" class="slider">
-
-        <label>C (Reactant Energy): <span id="c-value">0.0</span></label>
-        <input id="c-slider" type="range" min="-2.0" max="2.0" step="0.1" value="0.0" class="slider">
-    </div>
-
     <div class="plot-container" id="plot-3D"></div>
     <div class="plot-container" id="plot-contour"></div>
     <div class="plot-container" id="plot-reaction-coordinate"></div>
@@ -72,14 +61,15 @@
     <div class="plot-container" id="plot-V-vs-s"></div>
 
     <script>
-        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5;
-        let steps = 300;  // More data points for smoother curves
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
         let zMax = 5;
-        let p = 5;
+        let showHeatmap = true;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
+
+        let p = 5;
 
         function generateData(k, a, c) {
             let x = [], y = [], z = [];
@@ -103,41 +93,33 @@
             return { x, y, z };
         }
 
-        function computeReactionCoordinate() {
-            let s = [];
+        function computeReactionCoordinate(x) {
+            let s = [0];
             let dx = (xMax - xMin) / (steps - 1);
-            let value = 0;
-            for (let i = 0; i < steps; i++) {
+            for (let i = 1; i < steps; i++) {
                 let xi = xMin + i * dx;
                 let f_xi = Math.sqrt(xi ** 4 + 1) / (xi ** 2);
-                value += f_xi * dx;
-                s.push(value);
+                s.push(s[i - 1] + f_xi * dx);
             }
             return s;
         }
 
-        function generateReactionCoordinateData(k, a, c) {
-            let x = [], V = [];
-            let s = computeReactionCoordinate();
-
+        function generateReactionCoordinateData(k) {
+            let x = [], V = [], s = computeReactionCoordinate(xMax);
             for (let i = 0; i < steps; i++) {
                 let xv = xMin + (xMax - xMin) * i / (steps - 1);
                 let yv = 1 / xv;
                 let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1) ** 2) / 2));
-                let zv = Math.min(valley + peak + c, zMax);
-
-                if (s[i] >= 0.2 && s[i] <= 5) {
-                    x.push(s[i]);
-                    V.push(zv);
-                }
+                let peak = k * Math.exp(-(((xv - 1) ** 2) / 2 + ((yv - 1) ** 2) / 2));
+                let zv = Math.min(valley + peak, zMax);
+                x.push(s[i]);
+                V.push(zv);
             }
-
             return { x, V };
         }
 
         function generateXvsSData() {
-            let s = computeReactionCoordinate();
+            let s = computeReactionCoordinate(xMax);
             let x = [];
             for (let i = 0; i < steps; i++) {
                 x.push(xMin + (xMax - xMin) * i / (steps - 1));
@@ -146,13 +128,9 @@
         }
 
         function updatePlot() {
-            let k = parseFloat(document.getElementById("k-slider").value);
-            let a = parseFloat(document.getElementById("a-slider").value);
-            let c = parseFloat(document.getElementById("c-slider").value);
-
-            document.getElementById("k-value").textContent = k.toFixed(2);
-            document.getElementById("a-value").textContent = a.toFixed(2);
-            document.getElementById("c-value").textContent = c.toFixed(2);
+            let k = 0.75;
+            let a = transformSliderValue(0);
+            let c = 0.0;
 
             let data = generateData(k, a, c);
             
@@ -162,10 +140,29 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                showscale: true
+                showscale: false
+            };
+            
+            let contourPlot = {
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                contours: { 
+                    coloring: showHeatmap ? 'heatmap' : 'lines',
+                    showlines: true, 
+                    start: 1,  
+                    end: 4, 
+                    size: (4 - 1) / 20
+                },
+                line: {
+                    width: showHeatmap ? 1 : 3,
+                    color: 'black'
+                },
+                colorscale: 'Viridis'
             };
 
-            let reactionCoordinateData = generateReactionCoordinateData(k, a, c);
+            let reactionCoordinateData = generateReactionCoordinateData(k);
             let reactionCoordinatePlot = {
                 type: 'scatter',
                 x: reactionCoordinateData.x,
@@ -183,15 +180,49 @@
                 line: { color: 'green' }
             };
 
-            let layout3D = { height: 500, scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } } };
-            let layoutRC = { title: "Reaction Coordinate vs. V", xaxis: { title: "Reaction Coordinate (s)" }, yaxis: { title: "V (Potential Energy)" } };
+            let VvsSPlot = {
+                type: 'scatter',
+                x: reactionCoordinateData.x,
+                y: reactionCoordinateData.V,
+                mode: 'lines',
+                line: { color: 'red' }
+            };
+
+            let layout3D = {
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 },
+                scene: { xaxis: { title: 'rBC' }, yaxis: { title: 'rAB' }, zaxis: { title: 'V' } }
+            };
+
+            let layoutContour = {
+                height: 500,
+                margin: { l: 50, r: 50, b: 50, t: 50 }
+            };
+
+            let layoutReactionCoordinate = {
+                title: "Reaction Coordinate vs. V",
+                xaxis: { title: "Reaction Coordinate (s)" },
+                yaxis: { title: "V (Potential Energy)" }
+            };
+
+            let layoutXvsS = {
+                title: "X vs. s",
+                xaxis: { title: "s" },
+                yaxis: { title: "X" }
+            };
+
+            let layoutVvsS = {
+                title: "V vs. s",
+                xaxis: { title: "s" },
+                yaxis: { title: "V" }
+            };
 
             Plotly.newPlot('plot-3D', [surfacePlot], layout3D);
-            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutRC);
-            Plotly.newPlot('plot-X-vs-s', [XvsSPlot], layoutRC);
+            Plotly.newPlot('plot-contour', [contourPlot], layoutContour);
+            Plotly.newPlot('plot-reaction-coordinate', [reactionCoordinatePlot], layoutReactionCoordinate);
+            Plotly.newPlot('plot-X-vs-s', [XvsSPlot], layoutXvsS);
+            Plotly.newPlot('plot-V-vs-s', [VvsSPlot], layoutVvsS);
         }
-
-        document.querySelectorAll('.slider').forEach(slider => slider.addEventListener('input', updatePlot));
 
         updatePlot();
     </script>

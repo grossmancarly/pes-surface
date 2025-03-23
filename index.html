@@ -86,15 +86,17 @@
     </div>
 
     <script>
-        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+        let steps = 100;
         let zMax = 5;
         let showHeatmap = true;
+
+        // Adjust the domain
+        let xMin = 0.1, xMax = 5, yMin = 0.1, yMax = 5;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
-        let p = 5;
         function generateData(k, a, c) {
             let x = [], y = [], z = [];
             for (let i = 0; i < steps; i++) {
@@ -109,7 +111,7 @@
                     let valley = 1 / (xv * yv) + Math.log(xv * yv);
                     let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
                 
-                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+                    let reactantEnergy = c / (1 + Math.exp(-10 * (yv - 1/a)));  // Adjusted p value for clarity
 
                     let zv = Math.min(valley + peak + reactantEnergy, zMax);
                     row.push(zv);
@@ -117,32 +119,6 @@
                 z.push(row);
             }
             return { x, y, z };
-        }
-
-        // Reaction Coordinate Functions
-        function computeReactionCoordinate(x) {
-            let s = [0];
-            let dx = (xMax - xMin) / (steps - 1);
-            for (let i = 1; i < steps; i++) {
-                let xi = xMin + i * dx;
-                let f_xi = Math.sqrt(xi ** 4 + 1) / (xi ** 2);
-                s.push(s[i - 1] + f_xi * dx);
-            }
-            return s;
-        }
-
-        function generateReactionCoordinateData(k, a, c) {
-            let x = [], V = [], s = computeReactionCoordinate(xMax);
-            for (let i = 0; i < steps; i++) {
-                let xv = xMin + (xMax - xMin) * i / (steps - 1);
-                let yv = 1 / xv;
-                let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1) ** 2) / 2));
-                let zv = Math.min(valley + peak, zMax);
-                x.push(s[i]);
-                V.push(zv);
-            }
-            return { x, V };
         }
 
         function updatePlot() {

@@ -93,6 +93,9 @@
         <span id="cValue"></span>
 
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
+        
+        <!-- Toggle Heatmap Button -->
+        <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
     </div>
 
     <div id="reaction-plot"></div>
@@ -266,6 +269,11 @@
             showReactionPathway = !showReactionPathway;
             const reactionPlotElement = document.getElementById("reaction-plot");
             reactionPlotElement.style.display = showReactionPathway ? 'block' : 'none';
+            updatePlot();
+        }
+
+        function toggleHeatmap() {
+            showHeatmap = !showHeatmap;
             updatePlot();
         }
 

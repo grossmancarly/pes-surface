@@ -184,7 +184,6 @@
         showscale: false
     };
 
-    // Correctly add layout to surface plot
     surfacePlot.layout = {
         scene: {
             xaxis: { title: 'rAB' },  // Set the x-axis label
@@ -213,11 +212,14 @@
         colorscale: 'Viridis'
     };
 
-    // Correctly add layout to contour plot
     contourPlot.layout = {
         xaxis: { title: 'rAB' },  // Set the x-axis label
         yaxis: { title: 'rBC' }   // Set the y-axis label
     };
+
+    // Update the plots with layouts for both the surface and contour
+    Plotly.react("plot-3D", [surfacePlot], surfacePlot.layout);
+    Plotly.react("plot-contour", [contourPlot], contourPlot.layout);
 
     // Reaction Pathway Plot
     let reactionCoordinates = [];
@@ -275,6 +277,7 @@
     Plotly.react("plot-3D", [surfacePlot]);
     Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
 }
+
 
 
 

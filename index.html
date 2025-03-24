@@ -16,21 +16,27 @@
             color: black;
             padding-left: 200px; /* Space for the left-side flexbox */
         }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;  
+            width: 90%;
+            margin-top: 20px;
+            gap: 20px;  /* Space between surface and contour plots */
+        }
+
+        .plot {
+            width: 100%;
+            height: 500px;
+        }
+
         .plot-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;  /* Center align vertically */
-    width: 90%;
-    margin-bottom: 10px;  /* Reduced margin */
-    gap: 10px;  /* Added gap to control space between plots */
-}
-
-.plot {
-    width: 75%;  
-    height: 500px;
-    margin: 0;  /* Remove extra margin around individual plots */
-}
-
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50%;
+        }
 
         .slider-container {
             display: flex;
@@ -45,14 +51,16 @@
             border-radius: 10px;
             z-index: 10; /* Ensure it appears on top */
         }
+
         .slider {
             width: 100%;
             margin: 10px 0;
             background: #ccc;
             border-radius: 5px;
         }
+
         .toggle-button {
-            padding: 10px 10px;
+            padding: 10px 20px;
             font-size: 16px;
             background-color: #007BFF;
             color: white;
@@ -61,245 +69,147 @@
             cursor: pointer;
             transition: background 0.3s;
         }
+
         .toggle-button:hover {
             background-color: #0056b3;
         }
-        .button-container {
-            margin-top: 20px;
-        }
-        #reaction-plot {
-            width: 120%;
-            height: 500px;
-            margin-top: 20px;
-        }
-        #right-side-container {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    grid-gap: 5px;  /* Reduce space between heatmap button and contour plot */
-    width: 70%;
-}
 
-        #toggleHeatmapContainer {
+        .reaction-plot {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .button-container {
             display: flex;
-            justify-content: center;
+            justify-content: center;  
             align-items: center;
-            z-index: 10;
+            width: 100%;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h2>AB + C → ABC‡ → A + BC</h2>
 
+<h2>AB + C → ABC‡ → A + BC</h2>
+
+<div class="main-container">
+    <!-- Surface Plot -->
     <div class="plot-container">
         <div id="plot-3D" class="plot"></div>
-        
-        <!-- Right side grid container -->
-        <div id="right-side-container">
-            <div id="toggleHeatmapContainer">
-                <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
-            </div>
-            <div id="plot-contour" class="plot"></div>
-        </div>
     </div>
 
-    <div class="slider-container">
-        <label for="EaSlider">Activation Energy:</label>
-        <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
-        <span id="EaValue"></span>
-
-        <label for="aSlider">Transition State Position:</label>
-        <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
-            <span>Early</span>
-            <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
-            <span>Late</span>
+    <!-- Contour Plot with Heatmap Button -->
+    <div class="plot-container">
+        <div class="button-container">
+            <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
         </div>
+        <div id="plot-contour" class="plot"></div>
+    </div>
+</div>
 
-        <label for="cSlider">Reactant Energy:</label>
-        <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
-        <span id="cValue"></span>
+<div class="slider-container">
+    <label for="EaSlider">Activation Energy:</label>
+    <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
+    <span id="EaValue"></span>
 
-        <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
+    <label for="aSlider">Transition State Position:</label>
+    <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
+        <span>Early</span>
+        <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
+        <span>Late</span>
     </div>
 
-    <div id="reaction-plot"></div>
+    <label for="cSlider">Reactant Energy:</label>
+    <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
+    <span id="cValue"></span>
 
-    <script>
-        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
-        let zMax = 5;
-        let showHeatmap = true;
-        let showReactionPathway = false; // Flag to track if reaction pathway is visible
+    <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
+</div>
 
-        function transformSliderValue(x) {
-            return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
-        }
+<div id="reaction-plot" class="reaction-plot"></div>
 
-        let p = 5;
-        function generateData(k, a, c) {
-            let x = [], y = [], z = [];
-            for (let i = 0; i < steps; i++) {
-                x.push(xMin + (xMax - xMin) * i / (steps - 1));
-                y.push(yMin + (yMax - yMin) * i / (steps - 1));
-            }
-            for (let i = 0; i < steps; i++) {
-                let row = [];
-                for (let j = 0; j < steps; j++) {
-                    let xv = x[i];
-                    let yv = y[j];
-                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                    let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
+<script>
+    let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+    let zMax = 5;
+    let showHeatmap = true;
+    let showReactionPathway = false; 
 
-                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
-
-                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
-                    row.push(zv);
-                }
-                z.push(row);
-            }
-            return { x, y, z };
-        }
-
-        // Reaction Coordinate function definition
-        function reactionCoordinate(s, k, a, c) {
-            const h = 0.1;
-            return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1/s - 1/a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1/s - 1/a))), -1));
-        }
-
-        // Calculate Potential V(s)
-        function potential(s) {
-            let integral = 0;
-            for (let i = 0.2; i < s; i += 0.01) {
-                let x = i;
-                integral += Math.sqrt(Math.pow(x, 4) + 1) / Math.pow(x, 2) * 0.01;
-            }
-            return integral;
-        }
-
-        function updatePlot() {
-    let k = parseFloat(document.getElementById("EaSlider").value);
-    let sliderValue = parseFloat(document.getElementById("aSlider").value);
-    let c = parseFloat(document.getElementById("cSlider").value);
-    let a = transformSliderValue(sliderValue);
-    let data = generateData(k, a, c);
-
-    // Surface plot
-    let surfacePlot = {
-        type: 'surface',
-        x: data.x,
-        y: data.y,
-        z: data.z,
-        colorscale: 'Viridis',
-        showscale: false
-    };
-
-    surfacePlot.layout = {
-        scene: {
-            xaxis: { title: 'rAB' },  // Set the x-axis label
-            yaxis: { title: 'rBC' },  // Set the y-axis label
-            zaxis: { title: 'V' }     // Set the z-axis label
-        }
-    };
-
-    // Contour plot (always visible)
-    let contourPlot = {
-        type: 'contour',
-        x: data.x,
-        y: data.y,
-        z: data.z,
-        contours: { 
-            coloring: showHeatmap ? 'heatmap' : 'lines',
-            showlines: true, 
-            start: 1,  
-            end: 4, 
-            size: (4 - 1) / (20)
-        },
-        line: {
-            width: showHeatmap ? 1 : 3, 
-            color: 'black'
-        },
-        colorscale: 'Viridis'
-    };
-
-    contourPlot.layout = {
-        xaxis: { title: 'rAB' },  // Set the x-axis label
-        yaxis: { title: 'rBC' }   // Set the y-axis label
-    };
-
-    // Update the plots with layouts for both the surface and contour
-    Plotly.react("plot-3D", [surfacePlot], surfacePlot.layout);
-    Plotly.react("plot-contour", [contourPlot], contourPlot.layout);
-
-    // Reaction Pathway Plot
-    let reactionCoordinates = [];
-    let potentials = [];
-    if (showReactionPathway) {
-        for (let s = 0.2; s <= 5; s += 0.01) {
-            reactionCoordinates.push(reactionCoordinate(s, k, a, c));
-            potentials.push(potential(s));
-        }
-
-        let reactionPlot = {
-            x: potentials,
-            y: reactionCoordinates,
-            mode: 'lines',
-            type: 'scatter',
-            line: { color: '#007BFF' }
-        };
-
-        Plotly.react("reaction-plot", [reactionPlot]);
-
-        // Update layout to show axes for the reaction pathway plot with fixed ranges and labels
-        Plotly.relayout("reaction-plot", {
-            xaxis: { 
-                title: 'Reaction Coordinate', 
-                range: [0, 8.42] // Set range for Reaction Coordinate axis
-            },
-            yaxis: { 
-                title: 'Potential (V)', 
-                range: [0, 3] // Set fixed range for V axis
-            }
-        });
-    } else {
-        Plotly.react("reaction-plot", []); // Remove reaction pathway plot if hidden
-
-        // Update layout to hide axes for the reaction pathway plot
-        Plotly.relayout("reaction-plot", {
-            xaxis: { visible: false },
-            yaxis: { visible: false }
-        });
+    function transformSliderValue(x) {
+        return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
     }
 
-    // Reaction pathway line (y = 1/x) on contour plot
-    let reactionPathwayLine = showReactionPathway ? {
-        x: data.x.filter(x => x >= 0.01 && 1/x <= 5), // Adjust domain for 1/x <= 5
-        y: data.x.filter(x => x >= 0.01 && 1/x <= 5).map(x => 1/x), // y = 1/x, only where y <= 5
-        mode: 'lines',
-        name: 'y = 1/x',
-        line: {
-            color: 'red',
-            dash: 'dash',
+    let p = 5;
+    function generateData(k, a, c) {
+        let x = [], y = [], z = [];
+        for (let i = 0; i < steps; i++) {
+            x.push(xMin + (xMax - xMin) * i / (steps - 1));
+            y.push(yMin + (yMax - yMin) * i / (steps - 1));
         }
-    } : {};
-
-    // Plot 3D surface plot and contour plot (with or without reaction pathway line)
-    Plotly.react("plot-3D", [surfacePlot]);
-    Plotly.react("plot-contour", [contourPlot, reactionPathwayLine]);
-}
-
-
-
-
-
-        function toggleReactionPathway() {
-            showReactionPathway = !showReactionPathway;
-            updatePlot();
+        for (let i = 0; i < steps; i++) {
+            let row = [];
+            for (let j = 0; j < steps; j++) {
+                let xv = x[i];
+                let yv = y[j];
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
+                let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+                let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                row.push(zv);
+            }
+            z.push(row);
         }
+        return { x, y, z };
+    }
 
-        function toggleHeatmap() {
-            showHeatmap = !showHeatmap;
-            updatePlot();
-        }
+    function updatePlot() {
+        let k = parseFloat(document.getElementById("EaSlider").value);
+        let sliderValue = parseFloat(document.getElementById("aSlider").value);
+        let c = parseFloat(document.getElementById("cSlider").value);
+        let a = transformSliderValue(sliderValue);
+        let data = generateData(k, a, c);
 
+        let surfacePlot = {
+            type: 'surface',
+            x: data.x,
+            y: data.y,
+            z: data.z,
+            colorscale: 'Viridis',
+            showscale: false
+        };
+
+        let contourPlot = {
+            type: 'contour',
+            x: data.x,
+            y: data.y,
+            z: data.z,
+            contours: { 
+                coloring: showHeatmap ? 'heatmap' : 'lines',
+                showlines: true,
+                start: 1,
+                end: 4,
+                size: (4 - 1) / 20
+            },
+            line: { width: showHeatmap ? 1 : 3, color: 'black' },
+            colorscale: 'Viridis'
+        };
+
+        Plotly.react("plot-3D", [surfacePlot]);
+        Plotly.react("plot-contour", [contourPlot]);
+    }
+
+    function toggleHeatmap() {
+        showHeatmap = !showHeatmap;
         updatePlot();
-    </script>
+    }
+
+    function toggleReactionPathway() {
+        showReactionPathway = !showReactionPathway;
+        updatePlot();
+    }
+
+    updatePlot();
+</script>
+
 </body>
 </html>

@@ -219,7 +219,12 @@ let layout = {
             };
 
             Plotly.react("plot-3D", [surfacePlot]);
-            Plotly.react("plot-contour", [contourPlot, ...(showReactionPathway ? [y1overX] : [])]);
+            if (showReactionPathway) {
+    Plotly.react("plot-contour", [contourPlot, y1overX], contourLayout);
+} else {
+    Plotly.react("plot-contour", [contourPlot], contourLayout);
+}
+
 
             // Reaction Pathway Plot
             if (showReactionPathway) {

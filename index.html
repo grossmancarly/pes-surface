@@ -78,7 +78,7 @@
         #reaction-plot {
             width: 90%;
             height: 400px;
-            margin-top: -150px;
+            margin-top: -120px;
             display: none;  /* Initially hidden */
         }
 
@@ -168,76 +168,95 @@
     }
 
     function updatePlot() {
-        let k = parseFloat(document.getElementById("EaSlider").value);
-        let sliderValue = parseFloat(document.getElementById("aSlider").value);
-        let c = parseFloat(document.getElementById("cSlider").value);
-        let a = transformSliderValue(sliderValue);
-        let data = generateData(k, a, c);
+    let k = parseFloat(document.getElementById("EaSlider").value);
+    let sliderValue = parseFloat(document.getElementById("aSlider").value);
+    let c = parseFloat(document.getElementById("cSlider").value);
+    let a = transformSliderValue(sliderValue);
+    let data = generateData(k, a, c);
 
-        let surfacePlot = {
-            type: 'surface',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false  
-        };
+    let surfacePlot = {
+        type: 'surface',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false  
+    };
 
-        let contourPlot = {
-            type: 'contour',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false,
-            contours: {
-                coloring: 'heatmap',
-                showlabels: false,
-                showlines: true,
-                start: 0,
-                end: 4,
-                size: (4 - 1) / 30,
-                line: {
-                    width: 1,
-                    color: 'black'
-                }
+    let contourPlot = {
+        type: 'contour',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false,
+        contours: {
+            coloring: 'heatmap',
+            showlabels: false,
+            showlines: true,
+            start: 0,
+            end: 4,
+            size: (4 - 1) / 30,
+            line: {
+                width: 1,
+                color: 'black'
             }
-        };
-
-        let contourLayout = {
-            xaxis: { title: 'x' },
-            yaxis: { title: 'y', range: [0, 5] }
-        };
-
-        Plotly.react("plot-3D", [surfacePlot]);
-        Plotly.react("plot-contour", [contourPlot], contourLayout);
-
-        if (showReactionPathway) {
-            let reactionCoordinates = [];
-            let potentials = [];
-            for (let s = 0.2; s <= 5; s += 0.01) {
-                reactionCoordinates.push(reactionCoordinate(s, k, a, c));
-                potentials.push(potential(s));
-            }
-
-            let reactionPlot = {
-                x: potentials,
-                y: reactionCoordinates,
-                mode: 'lines',
-                type: 'scatter',
-                line: { color: '#007BFF' }
-            };
-
-            Plotly.react("reaction-plot", [reactionPlot], {
-                xaxis: { title: 'Reaction Coordinate' },
-                yaxis: { title: 'Potential (V)', range: [0, 3] }
-            });
-
-            document.getElementById("reaction-plot").style.display = "block";
-        } else {
-            document.getElementById("reaction-plot").style.display = "none";
         }
+    };
+
+    let contourLayout = {
+        xaxis: { title: 'x' },
+        yaxis: { title: 'y', range: [0, 5] }
+    };
+
+    // Plot the contour and surface plots
+    Plotly.react("plot-3D", [surfacePlot]);
+    Plotly.react("plot-contour", [contourPlot], contourLayout);
+
+    // Add the y = 1/x curve to the contour plot
+    let yInverseX = data.x.map(x => 1/x);  // Calculate y = 1/x for the x values
+    let inverseXPlot = {
+        x: data.x,
+        y: yInverseX,
+        mode: 'lines',
+        type: 'scatter',
+        line: { color: 'red', dash: 'dot' },  // Styling for the curve
+        name: 'y = 1/x'
+    };
+
+    // Add the curve to the contour plot
+    Plotly.extendTraces("plot-contour", {
+        x: [inverseXPlot.x],
+        y: [inverseXPlot.y]
+    }, [0]);
+
+    if (showReactionPathway) {
+        let reactionCoordinates = [];
+        let potentials = [];
+        for (let s = 0.2; s <= 5; s += 0.01) {
+            reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+            potentials.push(potential(s));
+        }
+
+        let reactionPlot = {
+            x: potentials,
+            y: reactionCoordinates,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#007BFF' }
+        };
+
+        Plotly.react("reaction-plot", [reactionPlot], {
+            xaxis: { title: 'Reaction Coordinate' },
+            yaxis: { title: 'Potential (V)', range: [0, 3] }
+        });
+
+        document.getElementById("reaction-plot").style.display = "block";
+    } else {
+        document.getElementById("reaction-plot").style.display = "none";
     }
+}
+
 
     function toggleReactionPathway() {
         showReactionPathway = !showReactionPathway;

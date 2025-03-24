@@ -196,8 +196,7 @@ let layout = {
     yaxis: { title: 'y', range: [0, 5] }  // Fixed y range
 };
 
-// Update the contour plot with the fixed y range
-Plotly.react("plot-contour", [contourPlot, ...(showReactionPathway ? [y1overX] : [])], layout);
+
 
 
 

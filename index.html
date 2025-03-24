@@ -168,7 +168,7 @@ let surfacePlot = {
     showscale: false  // Hide the color legend
 };
 
-// Contour Plot (remove color legend)
+// Contour Plot (always display y from 0 to 5)
 let contourPlot = {
     type: 'contour',
     x: data.x,
@@ -189,6 +189,16 @@ let contourPlot = {
         }
     }
 };
+
+// Set fixed y-axis range
+let layout = {
+    xaxis: { title: 'x' },
+    yaxis: { title: 'y', range: [0, 5] }  // Fixed y range
+};
+
+// Update the contour plot with the fixed y range
+Plotly.react("plot-contour", [contourPlot, ...(showReactionPathway ? [y1overX] : [])], layout);
+
 
 
             

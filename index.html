@@ -175,12 +175,16 @@
                 y: data.y,
                 z: data.z,
                 colorscale: 'Viridis',
-                line: { width: 1, color: 'black' }
+                contours: {
+                    coloring: 'heatmap',
+                    showlabels: true,
+                    labelfont: { family: 'Arial', size: 12, color: 'white' },
+                }
             };
 
             let y1overX = {
-                x: data.x,
-                y: data.x.map(v => 1 / v),
+                x: Array.from({length: 50}, (_, i) => 0.1 + i * 0.1),  // x from 0.1 to 5
+                y: Array.from({length: 50}, (_, i) => 1 / (0.1 + i * 0.1)),  // y = 1/x
                 mode: 'lines',
                 line: { color: 'red', width: 2 },
                 name: 'y = 1/x'

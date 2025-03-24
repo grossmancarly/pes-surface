@@ -71,12 +71,10 @@
         }
 
         #reaction-plot {
-            width: 60%;
+            width: 75%;
             height: 400px;
-            margin: 30px auto;   /* Centering the plot */
-            display: none;        /* Hidden initially */
-            position: relative;
-            order: -1;            /* Move it above the surface and contour plots */
+            margin: 10px auto 0;   /* Reduced top margin to scooch it up */
+            display: none;          /* Hidden initially */
         }
 
     </style>
@@ -85,7 +83,7 @@
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
-<div id="reaction-plot"></div> <!-- Moved up -->
+
 <div class="plot-container">
     <div id="plot-3D" class="plot"></div>
     <div id="plot-contour" class="plot"></div>
@@ -106,6 +104,8 @@
         <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
 
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
+
+        <div id="reaction-plot"></div> 
     </div>
 
 

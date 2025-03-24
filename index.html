@@ -17,6 +17,8 @@
             padding-left: 200px;
         }
 
+
+        
         .plot-container {
             display: flex;
             justify-content: space-between;
@@ -69,21 +71,25 @@
         }
 
         #reaction-plot {
-            width: 90%;
-            height: 500px;
-            margin-top: 20px;
-            display: none;  /* Hidden initially */
+            width: 60%;
+            height: 400px;
+            margin: 30px auto;   /* Centering the plot */
+            display: none;        /* Hidden initially */
+            position: relative;
+            order: -1;            /* Move it above the surface and contour plots */
         }
+
     </style>
 </head>
 
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
-    <div class="plot-container">
-        <div id="plot-3D" class="plot"></div>
-        <div id="plot-contour" class="plot"></div>
-    </div>
+<div id="reaction-plot"></div> <!-- Moved up -->
+<div class="plot-container">
+    <div id="plot-3D" class="plot"></div>
+    <div id="plot-contour" class="plot"></div>
+</div>
 
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
@@ -102,7 +108,7 @@
         <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
-    <div id="reaction-plot"></div>
+
 
     <script>
         let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;

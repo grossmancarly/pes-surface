@@ -186,8 +186,8 @@
 
             // Red line for y = 1/x, plotted from x = 0.1 to x = 5
             let y1overX = {
-                x: Array.from({length: 50}, (_, i) => 0.2 + i * 0.1),  // x from 0.2 to 5
-                y: Array.from({length: 50}, (_, i) => 1 / (0.2 + i * 0.1)),  // y = 1/x
+                x: Array.from({length: 49}, (_, i) => 0.2 + i * 0.1),  // x from 0.2 to 5
+                y: Array.from({length: 49}, (_, i) => 1 / (0.2 + i * 0.1)),  // y = 1/x
                 mode: 'lines',
                 line: { color: 'red', width: 2 },
                 name: 'y = 1/x'

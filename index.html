@@ -170,17 +170,19 @@
 
             // Contour Plot + y = 1/x line
             let contourPlot = {
-                type: 'contour',
-                x: data.x,
-                y: data.y,
-                z: data.z,
-                colorscale: 'Viridis',
-                contours: {
-                    coloring: 'heatmap',
-                    showlabels: true,
-                    labelfont: { family: 'Arial', size: 12, color: 'white' },
-                }
-            };
+    type: 'contour',
+    x: data.x,
+    y: data.y,
+    z: data.z,
+    colorscale: 'Viridis',
+    contours: {
+        coloring: 'heatmap',
+        showlabels: false,  // Remove the number labels
+        ncontours: 40,      // Set the number of contour lines (adjust as needed)
+    }
+};
+
+            z
 
             // Red line for y = 1/x, plotted from x = 0.1 to x = 5
             let y1overX = {

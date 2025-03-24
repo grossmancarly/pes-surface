@@ -170,25 +170,25 @@
 
             // Contour Plot + y = 1/x line
             let contourPlot = {
-    type: 'contour',
-    x: data.x,
-    y: data.y,
-    z: data.z,
-    colorscale: 'Viridis',
-    contours: {
-        coloring: 'heatmap',
-        showlabels: false,  // Remove number labels
-        showlines: true,    // Show contour lines
-        start: 0,           // Start of contour range
-        end: 4, // End of contour range (maximum value of Z)
-        size: (4 - 1) / 30,  // Controls the number of contour levels (adjust as needed)
-        line: {
-                    width: 1, 
-                    color: 'black'
-                },
-    }
-    
-};
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis',
+                contours: {
+                    coloring: 'heatmap',
+                    showlabels: false,  // Remove number labels
+                    showlines: true,    // Show contour lines
+                    start: 0,           // Start of contour range
+                    end: 4, // End of contour range (maximum value of Z)
+                    size: (4 - 1) / 30,  // Controls the number of contour levels (adjust as needed)
+                    line: {
+                                width: 1, 
+                                color: 'black'
+                            },
+                }
+                
+            };
 
             
 

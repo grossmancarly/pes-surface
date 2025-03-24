@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Transition State Surface with Contour</title>
+    <title>Transition State Surface with Reaction Pathway</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
@@ -68,17 +68,14 @@
             background-color: #0056b3;
         }
 
-        .reaction-container {
-            width: 90%;
-            margin-top: 30px;
-        }
-
         #reaction-plot {
-            width: 100%;
-            height: 400px;
+            width: 90%;
+            height: 500px;
+            margin-top: 20px;
         }
     </style>
 </head>
+
 <body>
     <h2>AB + C → ABC‡ → A + BC</h2>
 
@@ -90,7 +87,6 @@
     <div class="slider-container">
         <label for="EaSlider">Activation Energy:</label>
         <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
-        <span id="EaValue"></span>
 
         <label for="aSlider">Transition State Position:</label>
         <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
@@ -101,23 +97,44 @@
 
         <label for="cSlider">Reactant Energy:</label>
         <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
-        <span id="cValue"></span>
 
-        <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Toggle Reaction Pathway</button>
+        <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
-    <div class="reaction-container">
-        <div id="reaction-plot"></div>
-    </div>
+    <div id="reaction-plot"></div>
 
     <script>
-        let showReactionPathway = true;
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+        let zMax = 5;
+        let showReactionPathway = false;
 
         function transformSliderValue(x) {
             return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
 
         let p = 5;
+
+        function generateData(k, a, c) {
+            let x = [], y = [], z = [];
+            for (let i = 0; i < steps; i++) {
+                x.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
+            }
+            for (let i = 0; i < steps; i++) {
+                let row = [];
+                for (let j = 0; j < steps; j++) {
+                    let xv = x[i];
+                    let yv = y[j];
+                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                    let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
+                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                    row.push(zv);
+                }
+                z.push(row);
+            }
+            return { x, y, z };
+        }
 
         function reactionCoordinate(s, k, a, c) {
             const h = 0.1;
@@ -138,76 +155,67 @@
             let sliderValue = parseFloat(document.getElementById("aSlider").value);
             let c = parseFloat(document.getElementById("cSlider").value);
             let a = transformSliderValue(sliderValue);
+            let data = generateData(k, a, c);
 
-            let x = [];
-            let y = [];
-            let z = [];
-            
-            for (let i = -2; i <= 2; i += 0.1) {
-                let row = [];
-                for (let j = -2; j <= 2; j += 0.1) {
-                    x.push(i);
-                    y.push(j);
-                    row.push(Math.sin(i) * Math.cos(j) + k * Math.exp(-(i ** 2 + j ** 2)) + c);
-                }
-                z.push(row);
-            }
-
-            Plotly.newPlot("plot-3D", [{
-                type: "surface",
-                x: x,
-                y: y,
-                z: z
-            }], {
-                margin: { t: 30, b: 50, l: 50, r: 50 }
-            });
-
-            Plotly.newPlot("plot-contour", [{
-                z: z,
-                x: x,
-                y: y,
-                type: 'contour',
-                colorscale: 'Viridis'
-            }], {
-                margin: { t: 30, b: 50, l: 50, r: 50 }
-            });
-
-            // V vs Reaction Coordinate Plot
-            let reactionCoordinates = [];
-            let potentials = [];
-
-            for (let s = 0.2; s <= 5; s += 0.01) {
-                reactionCoordinates.push(reactionCoordinate(s, k, a, c));
-                potentials.push(potential(s));
-            }
-
-            let reactionPlot = {
-                x: potentials,
-                y: reactionCoordinates,
-                mode: 'lines',
-                type: 'scatter',
-                line: {
-                    color: '#007BFF',
-                    width: 3
-                },
-                name: 'V vs Reaction Coordinate'
+            // 3D Surface Plot
+            let surfacePlot = {
+                type: 'surface',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis',
+                showscale: true
             };
 
-            Plotly.react("reaction-plot", [reactionPlot], {
-                xaxis: {
-                    title: 'Reaction Coordinate',
-                    range: [0, 8.42],
-                    showgrid: true,
-                    zeroline: false
+            // Contour Plot
+            let contourPlot = {
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                contours: {
+                    coloring: 'heatmap',
+                    showlines: true,
+                    start: 1,
+                    end: 4,
+                    size: 0.15
                 },
-                yaxis: {
-                    title: 'Potential (V)',
-                    range: [0, 3],
-                    showgrid: true,
-                    zeroline: false
+                line: {
+                    width: 1,
+                    color: 'black'
                 },
-                margin: { t: 30, b: 50, l: 60, r: 30 }
-            });
+                colorscale: 'Viridis'
+            };
+
+            Plotly.react("plot-3D", [surfacePlot]);
+            Plotly.react("plot-contour", [contourPlot]);
+
+            // Reaction Pathway Plot
+            let reactionCoordinates = [];
+            let potentials = [];
+            if (showReactionPathway) {
+                for (let s = 0.2; s <= 5; s += 0.01) {
+                    reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+                    potentials.push(potential(s));
+                }
+
+                let reactionPlot = {
+                    x: potentials,
+                    y: reactionCoordinates,
+                    mode: 'lines',
+                    type: 'scatter',
+                    line: { color: '#007BFF' }
+                };
+
+                Plotly.react("reaction-plot", [reactionPlot]);
+
+                Plotly.relayout("reaction-plot", {
+                    xaxis: { title: 'Reaction Coordinate' },
+                    yaxis: { title: 'Potential (V)' }
+                });
+            } else {
+                Plotly.react("reaction-plot", []);
+            }
         }
 
         function toggleReactionPathway() {

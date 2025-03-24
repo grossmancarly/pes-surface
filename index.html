@@ -14,53 +14,52 @@
             text-align: center;
             background: white;
             color: black;
-            padding-left: 200px; /* Space for the left-side flexbox */
+            margin: 0;
+            padding: 0;
         }
-
         .main-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;  
-            width: 90%;
-            margin-top: 20px;
-            gap: 20px;  /* Space between surface and contour plots */
-        }
-
-        .plot {
-            width: 100%;
-            height: 500px;
-        }
-
-        .plot-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 50%;
+            width: 100%;
         }
-
+        .plot-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90%;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .plot {
+            flex: 1;
+            height: 500px;
+        }
+        .heatmap-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 10px;
+        }
         .slider-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* Align sliders to the left */
-            position: fixed; /* Fixed position on the left */
+            align-items: flex-start;
+            position: fixed;
             top: 20px;
-            left: 20px; /* Position from the left edge */
-            width: 200px; /* Fixed width for the slider container */
+            left: 20px;
+            width: 200px;
             padding: 15px;
-            background-color: rgba(255, 255, 255, 0.8); /* Slight transparent background */
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
-            z-index: 10; /* Ensure it appears on top */
+            z-index: 10;
         }
-
         .slider {
             width: 100%;
             margin: 10px 0;
-            background: #ccc;
-            border-radius: 5px;
         }
-
         .toggle-button {
-            padding: 10px 20px;
+            padding: 10px 10px;
             font-size: 16px;
             background-color: #007BFF;
             color: white;
@@ -69,147 +68,163 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-
         .toggle-button:hover {
             background-color: #0056b3;
         }
-
-        .reaction-plot {
-            width: 100%;
-            height: 300px;
+        .reaction-pathway-container {
+            width: 90%;
             margin-top: 20px;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;  
-            align-items: center;
-            width: 100%;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
+    <h2>AB + C → ABC‡ → A + BC</h2>
 
-<h2>AB + C → ABC‡ → A + BC</h2>
+    <div class="slider-container">
+        <label for="EaSlider">Activation Energy:</label>
+        <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
+        <span id="EaValue"></span>
 
-<div class="main-container">
-    <!-- Surface Plot -->
-    <div class="plot-container">
-        <div id="plot-3D" class="plot"></div>
+        <label for="aSlider">Transition State Position:</label>
+        <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
+            <span>Early</span>
+            <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
+            <span>Late</span>
+        </div>
+
+        <label for="cSlider">Reactant Energy:</label>
+        <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
+        <span id="cValue"></span>
+
+        <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
     </div>
 
-    <!-- Contour Plot with Heatmap Button -->
-    <div class="plot-container">
-        <div class="button-container">
+    <div class="main-container">
+        <div class="heatmap-container">
             <button id="toggleHeatmap" class="toggle-button" onclick="toggleHeatmap()">Toggle Heatmap</button>
         </div>
-        <div id="plot-contour" class="plot"></div>
-    </div>
-</div>
 
-<div class="slider-container">
-    <label for="EaSlider">Activation Energy:</label>
-    <input type="range" id="EaSlider" min="0.5" max="1" step="0.01" value="0.75" class="slider" oninput="updatePlot()">
-    <span id="EaValue"></span>
+        <div class="plot-container">
+            <div id="plot-3D" class="plot"></div>
+            <div id="plot-contour" class="plot"></div>
+        </div>
 
-    <label for="aSlider">Transition State Position:</label>
-    <div style="display: flex; align-items: center; width: 100%; justify-content: center;">
-        <span>Early</span>
-        <input type="range" id="aSlider" min="-0.8" max="1" step="0.1" value="0" class="slider" oninput="updatePlot()" style="margin: 0 10px;">
-        <span>Late</span>
+        <div class="reaction-pathway-container">
+            <div id="reaction-plot" style="width: 100%; height: 400px;"></div>
+        </div>
     </div>
 
-    <label for="cSlider">Reactant Energy:</label>
-    <input type="range" id="cSlider" min="0.0" max="1" step="0.01" value="0" class="slider" oninput="updatePlot()">
-    <span id="cValue"></span>
+    <script>
+        let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
+        let zMax = 5;
+        let showHeatmap = true;
+        let showReactionPathway = false;
 
-    <button id="showReactionPathway" class="toggle-button" onclick="toggleReactionPathway()">Show Reaction Pathway</button>
-</div>
-
-<div id="reaction-plot" class="reaction-plot"></div>
-
-<script>
-    let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
-    let zMax = 5;
-    let showHeatmap = true;
-    let showReactionPathway = false; 
-
-    function transformSliderValue(x) {
-        return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
-    }
-
-    let p = 5;
-    function generateData(k, a, c) {
-        let x = [], y = [], z = [];
-        for (let i = 0; i < steps; i++) {
-            x.push(xMin + (xMax - xMin) * i / (steps - 1));
-            y.push(yMin + (yMax - yMin) * i / (steps - 1));
+        function transformSliderValue(x) {
+            return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
         }
-        for (let i = 0; i < steps; i++) {
-            let row = [];
-            for (let j = 0; j < steps; j++) {
-                let xv = x[i];
-                let yv = y[j];
-                let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - a) ** 2)/2 + ((yv - 1/a) ** 2)/2));
-                let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1/a)));
-                let zv = Math.min(valley + peak + reactantEnergy, zMax);
-                row.push(zv);
+
+        let p = 5;
+
+        function generateData(k, a, c) {
+            let x = [], y = [], z = [];
+            for (let i = 0; i < steps; i++) {
+                x.push(xMin + (xMax - xMin) * i / (steps - 1));
+                y.push(yMin + (yMax - yMin) * i / (steps - 1));
             }
-            z.push(row);
+            for (let i = 0; i < steps; i++) {
+                let row = [];
+                for (let j = 0; j < steps; j++) {
+                    let xv = x[i];
+                    let yv = y[j];
+                    let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                    let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
+
+                    let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1 / a)));
+
+                    let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                    row.push(zv);
+                }
+                z.push(row);
+            }
+            return { x, y, z };
         }
-        return { x, y, z };
-    }
 
-    function updatePlot() {
-        let k = parseFloat(document.getElementById("EaSlider").value);
-        let sliderValue = parseFloat(document.getElementById("aSlider").value);
-        let c = parseFloat(document.getElementById("cSlider").value);
-        let a = transformSliderValue(sliderValue);
-        let data = generateData(k, a, c);
+        function reactionCoordinate(s, k, a, c) {
+            const h = 0.1;
+            return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1 / s - 1 / a))), -1));
+        }
 
-        let surfacePlot = {
-            type: 'surface',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false
-        };
+        function potential(s) {
+            let integral = 0;
+            for (let i = 0.2; i < s; i += 0.01) {
+                let x = i;
+                integral += Math.sqrt(Math.pow(x, 4) + 1) / Math.pow(x, 2) * 0.01;
+            }
+            return integral;
+        }
 
-        let contourPlot = {
-            type: 'contour',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            contours: { 
-                coloring: showHeatmap ? 'heatmap' : 'lines',
-                showlines: true,
-                start: 1,
-                end: 4,
-                size: (4 - 1) / 20
-            },
-            line: { width: showHeatmap ? 1 : 3, color: 'black' },
-            colorscale: 'Viridis'
-        };
+        function updatePlot() {
+            let k = parseFloat(document.getElementById("EaSlider").value);
+            let sliderValue = parseFloat(document.getElementById("aSlider").value);
+            let c = parseFloat(document.getElementById("cSlider").value);
+            let a = transformSliderValue(sliderValue);
+            let data = generateData(k, a, c);
 
-        Plotly.react("plot-3D", [surfacePlot]);
-        Plotly.react("plot-contour", [contourPlot]);
-    }
+            let surfacePlot = {
+                type: 'surface',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                colorscale: 'Viridis',
+                showscale: false
+            };
 
-    function toggleHeatmap() {
-        showHeatmap = !showHeatmap;
+            let contourPlot = {
+                type: 'contour',
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                contours: { coloring: showHeatmap ? 'heatmap' : 'lines' },
+                colorscale: 'Viridis'
+            };
+
+            Plotly.react("plot-3D", [surfacePlot]);
+            Plotly.react("plot-contour", [contourPlot]);
+
+            if (showReactionPathway) {
+                let reactionCoordinates = [];
+                let potentials = [];
+                for (let s = 0.2; s <= 5; s += 0.01) {
+                    reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+                    potentials.push(potential(s));
+                }
+
+                let reactionPlot = {
+                    x: potentials,
+                    y: reactionCoordinates,
+                    mode: 'lines',
+                    type: 'scatter',
+                    line: { color: '#007BFF' }
+                };
+
+                Plotly.react("reaction-plot", [reactionPlot]);
+            } else {
+                Plotly.react("reaction-plot", []);
+            }
+        }
+
+        function toggleReactionPathway() {
+            showReactionPathway = !showReactionPathway;
+            updatePlot();
+        }
+
+        function toggleHeatmap() {
+            showHeatmap = !showHeatmap;
+            updatePlot();
+        }
+
         updatePlot();
-    }
-
-    function toggleReactionPathway() {
-        showReactionPathway = !showReactionPathway;
-        updatePlot();
-    }
-
-    updatePlot();
-</script>
-
+    </script>
 </body>
 </html>

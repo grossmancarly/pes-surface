@@ -177,8 +177,11 @@
     colorscale: 'Viridis',
     contours: {
         coloring: 'heatmap',
-        showlabels: false,  // Remove the number labels
-        ncontours: 80,      // Set the number of contour lines (adjust as needed)
+        showlabels: false,  // Remove number labels
+        showlines: true,    // Show contour lines
+        start: 0,           // Start of contour range
+        end: Math.max(...data.z), // End of contour range (maximum value of Z)
+        size: (Math.max(...data.z) - 0) / 40,  // Controls the number of contour levels (adjust as needed)
     }
 };
 

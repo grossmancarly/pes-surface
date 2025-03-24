@@ -84,7 +84,6 @@
 
     <div class="plot-container">
         <div id="plot-3D" class="plot"></div>
-
         <div id="plot-contour" class="plot"></div>
     </div>
 
@@ -140,6 +139,40 @@
             let c = parseFloat(document.getElementById("cSlider").value);
             let a = transformSliderValue(sliderValue);
 
+            let x = [];
+            let y = [];
+            let z = [];
+            
+            for (let i = -2; i <= 2; i += 0.1) {
+                let row = [];
+                for (let j = -2; j <= 2; j += 0.1) {
+                    x.push(i);
+                    y.push(j);
+                    row.push(Math.sin(i) * Math.cos(j) + k * Math.exp(-(i ** 2 + j ** 2)) + c);
+                }
+                z.push(row);
+            }
+
+            Plotly.newPlot("plot-3D", [{
+                type: "surface",
+                x: x,
+                y: y,
+                z: z
+            }], {
+                margin: { t: 30, b: 50, l: 50, r: 50 }
+            });
+
+            Plotly.newPlot("plot-contour", [{
+                z: z,
+                x: x,
+                y: y,
+                type: 'contour',
+                colorscale: 'Viridis'
+            }], {
+                margin: { t: 30, b: 50, l: 50, r: 50 }
+            });
+
+            // V vs Reaction Coordinate Plot
             let reactionCoordinates = [];
             let potentials = [];
 
@@ -148,7 +181,6 @@
                 potentials.push(potential(s));
             }
 
-            // V vs Reaction Coordinate Plot
             let reactionPlot = {
                 x: potentials,
                 y: reactionCoordinates,

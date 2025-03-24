@@ -17,15 +17,21 @@
             padding-left: 200px; /* Space for the left-side flexbox */
         }
         .plot-container {
-            display: flex;
-            justify-content: space-between;
-            width: 90%;
-            margin-bottom: 20px;
-        }
-        .plot {
-            width: 75%; /* Make the plots take up almost half the width each */
-            height: 500px;
-        }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;  /* Center align vertically */
+    width: 90%;
+    margin-bottom: 10px;  /* Reduced margin */
+    gap: 10px;  /* Added gap to control space between plots */
+}
+
+.plot {
+    width: 75%;  
+    height: 500px;
+    margin: 0;  /* Remove extra margin around individual plots */
+}
+
+
         .slider-container {
             display: flex;
             flex-direction: column;
@@ -67,11 +73,12 @@
             margin-top: 20px;
         }
         #right-side-container {
-            display: grid;
-            grid-template-rows: auto 1fr;
-            grid-gap: 10px;
-            width: 48%; /* Make it take up half the width */
-        }
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-gap: 5px;  /* Reduce space between heatmap button and contour plot */
+    width: 70%;
+}
+
         #toggleHeatmapContainer {
             display: flex;
             justify-content: center;

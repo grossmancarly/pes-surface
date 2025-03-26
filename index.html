@@ -227,28 +227,31 @@
         }
     };
 
-    // Adjust the line plot to ensure 0 < x < 5 and 0 < y = 1/x < 5
-    let lineX = [];
-    let lineY = [];
-    for (let xVal = 0.1; xVal <= 5; xVal += 0.1) {
-        let yVal = 1 / xVal;
-        if (yVal <= 5) { // Only include y values where 0 < y < 5
-            lineX.push(xVal);
-            lineY.push(yVal);
+    // Prepare the line plot only if the reaction pathway is shown
+    let linePlot = null;
+    if (showReactionPathway) {
+        let lineX = [];
+        let lineY = [];
+        for (let xVal = 0.1; xVal <= 5; xVal += 0.1) {
+            let yVal = 1 / xVal;
+            if (yVal <= 5) { // Only include y values where 0 < y < 5
+                lineX.push(xVal);
+                lineY.push(yVal);
+            }
         }
+
+        linePlot = {
+            x: lineX,
+            y: lineY,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#FF0000', width: 2 },
+            name: 'y = 1/x'
+        };
     }
 
-    let linePlot = {
-        x: lineX,
-        y: lineY,
-        mode: 'lines',
-        type: 'scatter',
-        line: { color: '#FF0000', width: 2 },
-        name: 'y = 1/x'
-    };
-
     Plotly.react("plot-3D", [surfacePlot]);
-    Plotly.react("plot-contour", [contourPlot, linePlot]);
+    Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean)); // Only include the line plot if it's defined
 
     if (showReactionPathway) {
         let reactionCoordinates = [];
@@ -276,6 +279,7 @@
         document.getElementById("reaction-plot-container").style.display = "none";
     }
 }
+
 
 
 

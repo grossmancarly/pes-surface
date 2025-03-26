@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
             display: grid;
-            grid-template-columns: 250px 1fr;  /* Sidebar + Content */
+            grid-template-columns: 250px 1fr; /* Sidebar + Content */
             height: 100vh;
             color: black;
             background: white;
@@ -32,29 +32,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 20px;
             padding: 20px;
             overflow: auto;
         }
 
-      .reaction-equation {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-    position: sticky;
-    top: 0;
-    background-color: #f9f9f9; /* Lighter background */
-    padding: 12px;
-    border-radius: 6px; /* Rounded corners */
-    z-index: 100;
-    color: #343a40; /* Dark text color */
-    border: 1px solid #ddd; /* Subtle border */
-    transition: box-shadow 0.3s ease-in-out; /* Smooth transition */
-}
-
-
+        .reaction-equation {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 6px; /* Rounded corners */
+            z-index: 100;
+            color: #343a40; /* Dark text color */
+            transition: box-shadow 0.3s ease-in-out; /* Smooth transition */
+        }
 
         .plot-container {
             display: flex;
@@ -68,10 +65,16 @@
             height: 500px;
         }
 
-        #reaction-plot {
+        #reaction-plot-container {
+            display: flex;
+            justify-content: center;
             width: 100%;
-            height: 300px;
-            display: none;
+            height: 500px;
+        }
+
+        #reaction-plot {
+            width: 80%; /* Adjust width to be more contained */
+            height: 100%;
         }
 
         .slider {
@@ -91,6 +94,14 @@
 
         .toggle-button:hover {
             background-color: #0056b3;
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 900px) {
+            .plot-container {
+                flex-direction: column;
+                gap: 20px;
+            }
         }
     </style>
 </head>
@@ -129,7 +140,9 @@
     </div>
 
     <!-- Reaction Pathway Plot: Hidden by Default -->
-    <div id="reaction-plot"></div>
+    <div id="reaction-plot-container">
+        <div id="reaction-plot"></div>
+    </div>
 </div>
 
 <script>
@@ -237,9 +250,9 @@
                 yaxis: { title: 'Potential (V)', range: [0, 3] }
             });
 
-            document.getElementById("reaction-plot").style.display = "block";
+            document.getElementById("reaction-plot-container").style.display = "flex";
         } else {
-            document.getElementById("reaction-plot").style.display = "none";
+            document.getElementById("reaction-plot-container").style.display = "none";
         }
     }
 

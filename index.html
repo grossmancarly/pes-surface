@@ -224,7 +224,9 @@
             end: 4,
             size: 0.1,
             line: { width: 1, color: 'black' }
-        }
+        },
+        xaxis: { range: [0, 5] },  // Fixing the x-axis range from 0 to 5
+        yaxis: { range: [0, 5] }   // Fixing the y-axis range from 0 to 5
     };
 
     // Prepare the line plot only if the reaction pathway is shown
@@ -279,6 +281,7 @@
         document.getElementById("reaction-plot-container").style.display = "none";
     }
 }
+
 
 
 

@@ -255,7 +255,10 @@
     }
 
     Plotly.react("plot-3D", [surfacePlot]);
-    Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean)); // Only include the line plot if it's defined
+Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
+    xaxis: { title: 'x', range: [0, 5] },    // Fixed x-axis range
+    yaxis: { title: 'y', range: [0, 5] }     // Fixed y-axis range
+});
 
     if (showReactionPathway) {
         let reactionCoordinates = [];

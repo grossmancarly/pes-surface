@@ -147,10 +147,9 @@
 </div>
 
 <script>
-    let xMin = 0.2, xMax = 5, yMin = 0.2, yMax = 5, steps = 100;
+    let xMin = -0.2, xMax = 5, yMin = -0.2, yMax = 5, steps = 100;
     let zMax = 5;
     let showReactionPathway = false;
-    let show1xLine = false;  // Variable to toggle the y = 1/x line
 
     function transformSliderValue(x) {
         return 1.15 * Math.pow(x, 2) + 1.85 * x + 1;
@@ -228,25 +227,8 @@
             }
         };
 
-        // Add y = 1/x line to the contour plot
-        let xVals = [];
-        let yVals = [];
-        for (let x = 0.2; x <= 5; x += 0.01) {
-            xVals.push(x);
-            yVals.push(1 / x);
-        }
-
-        let line1x = {
-            x: xVals,
-            y: yVals,
-            mode: 'lines',
-            type: 'scatter',
-            line: { color: 'red', dash: 'dot' },  // Style for y = 1/x line
-            name: 'y = 1/x'
-        };
-
         Plotly.react("plot-3D", [surfacePlot]);
-        Plotly.react("plot-contour", [contourPlot, line1x]);  // Add line to contour plot
+        Plotly.react("plot-contour", [contourPlot]);
 
         if (showReactionPathway) {
             let reactionCoordinates = [];
@@ -273,13 +255,6 @@
         } else {
             document.getElementById("reaction-plot-container").style.display = "none";
         }
-
-        // Toggle the visibility of the y = 1/x line
-        if (show1xLine) {
-            Plotly.update("plot-contour", { visible: true }, [1]);  // Show the line
-        } else {
-            Plotly.update("plot-contour", { visible: false }, [1]);  // Hide the line
-        }
     }
 
     function toggleReactionPathway() {
@@ -287,14 +262,8 @@
         updatePlot();
     }
 
-    function toggle1xLine() {
-        show1xLine = !show1xLine;
-        updatePlot();
-    }
-
     updatePlot();
 </script>
-
 
 </body>
 </html>

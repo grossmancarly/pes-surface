@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reaction Pathway Visualization</title>
+    <title>Reaction Pathway</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
@@ -36,6 +36,12 @@
             gap: 20px;
             padding: 20px;
             overflow: auto;
+        }
+
+        .reaction-equation {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
         }
 
         .plot-container {
@@ -101,7 +107,9 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <h2>AB + C → ABC‡ → A + BC</h2>
+    
+    <!-- Reaction Equation: Always visible -->
+    <div class="reaction-equation">AB + C → ABC‡ → A + BC</div>
 
     <div class="plot-container">
         <div id="plot-3D" class="plot"></div>

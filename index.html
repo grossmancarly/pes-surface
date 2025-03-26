@@ -170,11 +170,11 @@ function calculatePeak(x, y, k, a) {
 }
 
 // Function to compute the reactant energy term
-function calculateReactantEnergy(y, c) {
+function calculateReactantEnergy(y, c, a, p) {
     return c / (1 + Math.exp(-p * (y - 1 / a)));
 }
 
-function generateData(k, a, c) {
+function generateData(k, a, c, p) {
     let x = [], y = [], z = [];
     for (let i = 0; i < steps; i++) {
         x.push(xMin + (xMax - xMin) * i / (steps - 1));
@@ -188,7 +188,7 @@ function generateData(k, a, c) {
             let yv = y[j];
             let valley = calculateValley(xv, yv);
             let peak = calculatePeak(xv, yv, k, a);
-            let reactantEnergy = calculateReactantEnergy(yv, c);
+            let reactantEnergy = calculateReactantEnergy(yv, c, a, p);
             let zv = Math.min(valley + peak + reactantEnergy, zMax);
             row.push(zv);
         }
@@ -197,15 +197,16 @@ function generateData(k, a, c) {
     return { x, y, z };
 }
 
-function reactionCoordinate(s, k, a, c) {
+function reactionCoordinate(s, k, a, c, p) {
     const h = 0.1;
     let xv = s;
     let yv = 1 / s; // 1/x relation
     let valley = calculateValley(xv, yv);
     let peak = calculatePeak(xv, yv, k, a);
-    let reactantEnergy = calculateReactantEnergy(yv, c);
+    let reactantEnergy = calculateReactantEnergy(yv, c, a, p);
     return valley + peak + reactantEnergy; // Combine the terms
 }
+
 
 
     function potential(s) {

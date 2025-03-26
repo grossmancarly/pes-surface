@@ -194,68 +194,88 @@
     }
 
     function updatePlot() {
-        let k = parseFloat(document.getElementById("EaSlider").value);
-        let sliderValue = parseFloat(document.getElementById("aSlider").value);
-        let c = parseFloat(document.getElementById("cSlider").value);
-        let a = transformSliderValue(sliderValue);
-        let data = generateData(k, a, c);
+    let k = parseFloat(document.getElementById("EaSlider").value);
+    let sliderValue = parseFloat(document.getElementById("aSlider").value);
+    let c = parseFloat(document.getElementById("cSlider").value);
+    let a = transformSliderValue(sliderValue);
+    let data = generateData(k, a, c);
 
-        let surfacePlot = {
-            type: 'surface',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false
-        };
+    let surfacePlot = {
+        type: 'surface',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false
+    };
 
-        let contourPlot = {
-            type: 'contour',
-            x: data.x,
-            y: data.y,
-            z: data.z,
-            colorscale: 'Viridis',
-            showscale: false,
-            contours: {
-                coloring: 'heatmap',
-                showlabels: false,
-                showlines: true,
-                start: 0,
-                end: 4,
-                size: 0.1,
-                line: { width: 1, color: 'black' }
-            }
-        };
+    let contourPlot = {
+        type: 'contour',
+        x: data.x,
+        y: data.y,
+        z: data.z,
+        colorscale: 'Viridis',
+        showscale: false,
+        contours: {
+            coloring: 'heatmap',
+            showlabels: false,
+            showlines: true,
+            start: 0,
+            end: 4,
+            size: 0.1,
+            line: { width: 1, color: 'black' }
+        }
+    };
 
-        Plotly.react("plot-3D", [surfacePlot]);
-        Plotly.react("plot-contour", [contourPlot]);
-
-        if (showReactionPathway) {
-            let reactionCoordinates = [];
-            let potentials = [];
-            for (let s = 0.2; s <= 5; s += 0.01) {
-                reactionCoordinates.push(reactionCoordinate(s, k, a, c));
-                potentials.push(potential(s));
-            }
-
-            let reactionPlot = {
-                x: potentials,
-                y: reactionCoordinates,
-                mode: 'lines',
-                type: 'scatter',
-                line: { color: '#007BFF' }
-            };
-
-            Plotly.react("reaction-plot", [reactionPlot], {
-                xaxis: { title: 'Reaction Coordinate' },
-                yaxis: { title: 'Potential (V)', range: [0, 3] }
-            });
-
-            document.getElementById("reaction-plot-container").style.display = "flex";
-        } else {
-            document.getElementById("reaction-plot-container").style.display = "none";
+    // Add the line y = 1/x
+    let lineX = [];
+    let lineY = [];
+    for (let xVal = xMin; xVal <= xMax; xVal += 0.1) {
+        if (xVal !== 0) { // Avoid division by zero
+            lineX.push(xVal);
+            lineY.push(1 / xVal);
         }
     }
+
+    let linePlot = {
+        x: lineX,
+        y: lineY,
+        mode: 'lines',
+        type: 'scatter',
+        line: { color: '#FF0000', width: 2 },
+        name: 'y = 1/x'
+    };
+
+    Plotly.react("plot-3D", [surfacePlot]);
+    Plotly.react("plot-contour", [contourPlot, linePlot]);
+
+    if (showReactionPathway) {
+        let reactionCoordinates = [];
+        let potentials = [];
+        for (let s = 0.2; s <= 5; s += 0.01) {
+            reactionCoordinates.push(reactionCoordinate(s, k, a, c));
+            potentials.push(potential(s));
+        }
+
+        let reactionPlot = {
+            x: potentials,
+            y: reactionCoordinates,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: '#007BFF' }
+        };
+
+        Plotly.react("reaction-plot", [reactionPlot], {
+            xaxis: { title: 'Reaction Coordinate' },
+            yaxis: { title: 'Potential (V)', range: [0, 3] }
+        });
+
+        document.getElementById("reaction-plot-container").style.display = "flex";
+    } else {
+        document.getElementById("reaction-plot-container").style.display = "none";
+    }
+}
+
 
     function toggleReactionPathway() {
         showReactionPathway = !showReactionPathway;

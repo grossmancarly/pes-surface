@@ -328,7 +328,7 @@ Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
     if (showReactionPathway) {
         let reactionCoordinates = [];
         let potentials = [];
-        for (let s = 0.2; s <= 5; s += 0.01) {
+        for (let s = 0.2; s <= 5; s += 0.005) {
             reactionCoordinates.push(reactionCoordinate(s, k, a, c));
             potentials.push(potential(s));
         }

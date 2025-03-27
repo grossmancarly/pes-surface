@@ -159,28 +159,41 @@
 
     let p = 5;
 
-   function generateData(k, a, c) {
-        let x = [], y = [], z = [];
-        for (let i = 0; i < steps; i++) {
-            x.push(xMin + (xMax - xMin) * i / (steps - 1));
-            y.push(yMin + (yMax - yMin) * i / (steps - 1));
-        }
-        for (let i = 0; i < steps; i++) {
-            let row = [];
-            for (let j = 0; j < steps; j++) {
-                let xv = x[i];
-                let yv = y[j];
-                let valley = 1 / (xv * yv) + Math.log(xv * yv);
-                let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
-                let reactantEnergy = return c * Math.pow((1 + Math.exp(-p * ((a**3 * xv - a**4 - a * yv + 1) / (a * Math.sqrt(a**4 + 1))))), -1);
-};
-                let zv = Math.min(valley + peak + reactantEnergy, zMax);
-                row.push(zv);
-            }
-            z.push(row);
-        }
-        return { x, y, z };
+   function generateData(k, a, c, p, xMin, xMax, yMin, yMax, steps, zMax) {
+    let x = [], y = [], z = [];
+
+    // Generate x and y values
+    for (let i = 0; i < steps; i++) {
+        x.push(xMin + (xMax - xMin) * i / (steps - 1));
+        y.push(yMin + (yMax - yMin) * i / (steps - 1));
     }
+
+    // Calculate z values
+    for (let i = 0; i < steps; i++) {
+        let row = [];
+        for (let j = 0; j < steps; j++) {
+            let xv = x[i];
+            let yv = y[j];
+            
+            // Valley calculation
+            let valley = 1 / (xv * yv) + Math.log(xv * yv);
+
+            // Peak calculation
+            let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
+
+            // Reactant energy calculation
+            let reactantEnergy = c * Math.pow((1 + Math.exp(-p * ((a**3 * xv - a**4 - a * yv + 1) / (a * Math.sqrt(a**4 + 1))))), -1);
+
+            // Calculate z value
+            let zv = Math.min(valley + peak + reactantEnergy, zMax);
+            row.push(zv);
+        }
+        z.push(row);
+    }
+
+    return { x, y, z };
+}
+
 
     function reactionCoordinate(s, k, a, c) {
         const h = 0.1;

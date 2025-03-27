@@ -266,7 +266,8 @@
         };
     }
 
-    Plotly.react("plot-3D", [surfacePlot]);
+        
+    Plotly.react("plot-3D", [surfacePlot], layout);
 Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
     xaxis: { title: 'rBC', range: [0, 5] },    // Fixed x-axis range
     yaxis: { title: 'rAB', range: [0, 5] }     // Fixed y-axis range

@@ -253,28 +253,12 @@
     }
 
 
-    function smoothData(data, windowSize = 5) {
-    let smoothedData = [];
-    for (let i = 0; i < data.length; i++) {
-        let start = Math.max(0, i - Math.floor(windowSize / 2));
-        let end = Math.min(data.length - 1, i + Math.floor(windowSize / 2));
-        let window = data.slice(start, end + 1);
-        let avg = window.reduce((acc, val) => acc + val, 0) / window.length;
-        smoothedData.push(avg);
-    }
-    return smoothedData;
-}
-
-
     function updatePlot() {
     let k = parseFloat(document.getElementById("EaSlider").value);
     let sliderValue = parseFloat(document.getElementById("aSlider").value);
     let c = parseFloat(document.getElementById("cSlider").value);
     let a = transformSliderValue(sliderValue);
     let data = generateData(k, a, c);
-
-    // Apply smoothing to the z data (voltage data)
-    data.z = smoothData(data.z, 5);  // Adjust the window size (5) as needed
 
     let surfacePlot = {
         type: 'surface',
@@ -284,13 +268,13 @@
         colorscale: 'Viridis',
         showscale: false,
     };
-    let layout = {
-        scene: {
-            xaxis: { title: 'rBC' },
-            yaxis: { title: 'rAB' },
-            zaxis: { title: 'V' }
-        }
-    };
+        let layout = {
+    scene: {
+        xaxis: { title: 'rBC' },
+        yaxis: { title: 'rAB' },
+        zaxis: { title: 'V' }
+    }
+};
 
     let contourPlot = {
         type: 'contour',
@@ -308,8 +292,8 @@
             size: 0.1,
             line: { width: 1, color: 'black' }
         },
-        xaxis: { title: 'rBC', range: [0, 5] },
-        yaxis: { title: 'rAB', range: [0, 5] }
+        xaxis: { title: 'rBC', range: [0, 5] },  // Fixing the x-axis range from 0 to 5
+        yaxis: { title: 'rAB',range: [0, 5] }   // Fixing the y-axis range from 0 to 5
     };
 
     // Prepare the line plot only if the reaction pathway is shown
@@ -319,7 +303,7 @@
         let lineY = [];
         for (let xVal = 0.1; xVal <= 5; xVal += 0.01) {
             let yVal = 1 / xVal;
-            if (yVal <= 5) {
+            if (yVal <= 5) { // Only include y values where 0 < y < 5
                 lineX.push(xVal);
                 lineY.push(yVal);
             }
@@ -335,11 +319,12 @@
         };
     }
 
+        
     Plotly.react("plot-3D", [surfacePlot], layout);
-    Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
-        xaxis: { title: 'rBC', range: [0, 5] },
-        yaxis: { title: 'rAB', range: [0, 5] }
-    });
+Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
+    xaxis: { title: 'rBC', range: [0, 5] },    // Fixed x-axis range
+    yaxis: { title: 'rAB', range: [0, 5] }     // Fixed y-axis range
+});
 
     if (showReactionPathway) {
         let reactionCoordinates = [];

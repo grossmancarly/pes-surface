@@ -159,63 +159,32 @@
 
     let p = 5;
 
-       // Function to calculate the valley term
-function calculateValley(xv, yv) {
-    return 1 / (xv * yv) + Math.log(xv * yv);
-}
-
-// Function to calculate the peak term
-function calculatePeak(xv, yv, k, a) {
-    return k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
-}
-
-// Function to calculate the reactant energy
-function calculateReactantEnergy(yv, a, c, p) {
-    return c / (1 + Math.exp(-p * (yv - 1 / a)));
-}
-
-// Function to generate the data
-function generateData(k, a, c, p, xMin, xMax, yMin, yMax, steps, zMax) {
-    let x = [], y = [], z = [];
-    
-    // Generate x and y values
-    for (let i = 0; i < steps; i++) {
-        x.push(xMin + (xMax - xMin) * i / (steps - 1));
-        y.push(yMin + (yMax - yMin) * i / (steps - 1));
-    }
-
-    // Calculate z values
-    for (let i = 0; i < steps; i++) {
-        let row = [];
-        for (let j = 0; j < steps; j++) {
-            let xv = x[i];
-            let yv = y[j];
-            
-            let valley = calculateValley(xv, yv);
-            let peak = calculatePeak(xv, yv, k, a);
-            let reactantEnergy = calculateReactantEnergy(yv, a, c, p);
-            
-            let zv = Math.min(valley + peak + reactantEnergy, zMax);
-            row.push(zv);
+      function generateData(k, a, c) {
+        let x = [], y = [], z = [];
+        for (let i = 0; i < steps; i++) {
+            x.push(xMin + (xMax - xMin) * i / (steps - 1));
+            y.push(yMin + (yMax - yMin) * i / (steps - 1));
         }
-        z.push(row);
+        for (let i = 0; i < steps; i++) {
+            let row = [];
+            for (let j = 0; j < steps; j++) {
+                let xv = x[i];
+                let yv = y[j];
+                let valley = 1 / (xv * yv) + Math.log(xv * yv);
+                let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
+                let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1 / a)));
+                let zv = Math.min(valley + peak + reactantEnergy, zMax);
+                row.push(zv);
+            }
+            z.push(row);
+        }
+        return { x, y, z };
     }
-    return { x, y, z };
-}
 
-// Function for the reaction coordinate (can reuse the valley, peak, and reactant energy functions)
-function reactionCoordinate(s, k, a, c, p) {
-    const h = 0.1;
-    
-    let xv = s;  // Now we are considering s as a value for xv
-    let yv = 1 / s;  // Assuming we are considering yv to be the reciprocal of s
-    
-    let valley = calculateValley(xv, yv);
-    let peak = calculatePeak(xv, yv, k, a);
-    let reactantEnergy = calculateReactantEnergy(yv, a, c, p);
-    
-    return 1 + peak + valley + reactantEnergy;
-}
+    function reactionCoordinate(s, k, a, c) {
+        const h = 0.1;
+        return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1 / s - 1 / a))), -1));
+    }
 
 
 

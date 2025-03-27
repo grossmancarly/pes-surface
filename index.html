@@ -240,7 +240,7 @@
     if (showReactionPathway) {
         let lineX = [];
         let lineY = [];
-        for (let xVal = 0.1; xVal <= 5; xVal += 0.1) {
+        for (let xVal = 0.1; xVal <= 5; xVal += 0.01) {
             let yVal = 1 / xVal;
             if (yVal <= 5) { // Only include y values where 0 < y < 5
                 lineX.push(xVal);

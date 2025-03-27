@@ -172,7 +172,8 @@
                 let yv = y[j];
                 let valley = 1 / (xv * yv) + Math.log(xv * yv);
                 let peak = k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
-                let reactantEnergy = c / (1 + Math.exp(-p * (yv - 1 / a)));
+                let reactantEnergy = return c * Math.pow((1 + Math.exp(-p * ((a**3 * xv - a**4 - a * yv + 1) / (a * Math.sqrt(a**4 + 1))))), -1);
+};
                 let zv = Math.min(valley + peak + reactantEnergy, zMax);
                 row.push(zv);
             }
@@ -183,7 +184,7 @@
 
     function reactionCoordinate(s, k, a, c) {
         const h = 0.1;
-        return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * (Math.pow((1 + Math.exp(-p * (1 / s - 1 / a))), -1));
+        return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * Math.pow((1 + Math.exp(-p * ((a**3 * s - a**4 - a * 1/s + 1) / (a * Math.sqrt(a**4 + 1))))), -1);
     }
 
 

@@ -231,8 +231,8 @@
             size: 0.1,
             line: { width: 1, color: 'black' }
         },
-        xaxis: { title: r'$r_{BC}$', range: [0, 5] },  // Fixing the x-axis range from 0 to 5
-        yaxis: { title: r'$r_{AB}$',range: [0, 5] }   // Fixing the y-axis range from 0 to 5
+        xaxis: { title: '$r_{BC}$', range: [0, 5] },  // Fixing the x-axis range from 0 to 5
+        yaxis: { title: '$r_{AB}$',range: [0, 5] }   // Fixing the y-axis range from 0 to 5
     };
 
     // Prepare the line plot only if the reaction pathway is shown
@@ -253,15 +253,15 @@
             y: lineY,
             mode: 'lines',
             type: 'scatter',
-            line: { color: '#FF0000', width: 2 },
+            line: { color: '#FF0000', width: 2, dash: 'dash' },
             name: 'y = 1/x'
         };
     }
 
     Plotly.react("plot-3D", [surfacePlot]);
 Plotly.react("plot-contour", [contourPlot, linePlot].filter(Boolean), {
-    xaxis: { title: r'$r_{BC}$', range: [0, 5] },    // Fixed x-axis range
-    yaxis: { title: r'$r_{AB}$', range: [0, 5] }     // Fixed y-axis range
+    xaxis: { title: '$r_{BC}$', range: [0, 5] },    // Fixed x-axis range
+    yaxis: { title: '$r_{AB}$', range: [0, 5] }     // Fixed y-axis range
 });
 
     if (showReactionPathway) {

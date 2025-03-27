@@ -80,15 +80,62 @@
             height: 100%;
         }
 
-        .slider {
-            width: 100%;
-            margin: 10px;
-        }
-        .sidebar label {
-        display: block;        
-        margin-bottom: 2px;    
-        font-weight: bold;     
-    }
+        /* Styles for the sliders in the sidebar */
+.sidebar label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.slider {
+    width: 100%;
+    margin: 10px 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 10px;
+    background: #ddd;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.slider:active::-webkit-slider-thumb {
+    background: #0056b3;
+}
+
+.slider:active::-moz-range-thumb {
+    background: #0056b3;
+}
+
+/* Add more styling for the slider values or ranges */
+.sidebar .slider-value {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    color: #333;
+}
+
 
         .toggle-button {
             padding: 10px 15px;

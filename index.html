@@ -159,6 +159,25 @@
 
     let p = 5;
 
+    // Function to calculate the valley term
+function calculateValley(xv, yv) {
+    return 1 / (xv * yv) + Math.log(xv * yv);
+}
+
+// Function to calculate the peak term
+function calculatePeak(xv, yv, k, a) {
+    return k * Math.exp(-(((xv - a) ** 2) / 2 + ((yv - 1 / a) ** 2) / 2));
+}
+
+// Function to calculate the reactant energy
+function calculateReactantEnergy(yv, a, c, p) {
+    return c / (1 + Math.exp(-p * (yv - 1 / a)));
+}
+
+// Function to generate the data
+function generateData(k, a, c, p, xMin, xMax, yMin, yMax, steps, zMax) {
+    let x = [], y = [], z = [];
+
       function generateData(k, a, c) {
         let x = [], y = [], z = [];
         for (let i = 0; i < steps; i++) {

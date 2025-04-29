@@ -236,8 +236,8 @@
     }
 
     function reactionCoordinate(s, k, a, c) {
-        const h = 0.1, f = 0.2;
-        return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * Math.pow((1 + Math.exp(p * ((a**3 * s - a**4 - a * 1/s + 1) / (a * Math.sqrt(a**4 + 1))))), -1) * Math.exp (-1* ((f*s)**2+(f*1/s)**2));;
+        const h = 0.1;
+        return 1 + k * Math.exp(-((Math.pow(s - a, 2) / h) + (Math.pow((1 / s - 1 / a), 2) / h))) + c * Math.pow((1 + Math.exp(p * ((a**3 * s - a**4 - a * 1/s + 1) / (a * Math.sqrt(a**4 + 1))))), -1);
     }
 
 
